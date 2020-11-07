@@ -1,18 +1,20 @@
 //pre: cierto
 //post: max es el elemento máximo des e i es la posición en la que
+
 //      se encuentra.
-FUNCION mayor(SEQ(NUM)s) dev (NUM i,NUM max)
 VARIABLES
-    j: NUM;
+    k: NUM;
+
+SUBPROGRAMAS
+    FUNCION mayor(SEQ(NUM) s) dev (NUM i,NUM max)
+        VARIABLES
+            j: NUM;
+        INSTRUCCIONES
+            q = 10;
+            mientras(s[j]>max) hacer
+                i=j;
+            fmientras
+    FFUNCION
+
 INSTRUCCIONES
-    j=0;
-    max=s[j];
-    mientras(j<=ultima_posicion(s))hacer
-        si(s[j]>max) entonces
-            max=s[j];
-            i=j;
-        fsi
-        j=j+1;
-    fmientras
-    dev max,i;//retorno de parámetros de salida.
-FFUNCION
+    k[1]=q;
