@@ -46,7 +46,11 @@ tipo_instruccion: ins_asignacion
     ;
 
 //INS ASIGNACION
-ins_asignacion: IDENT (COMA IDENT)* ASIG expresion_asignacion (COMA expresion_asignacion)* PyC;
+ins_asignacion: identificador_variables (COMA identificador_variables)* ASIG expresion_asignacion (COMA expresion_asignacion)* PyC;
+
+identificador_variables: IDENT CA expresion_asignacion CC |
+    IDENT
+    ;
 
 expresion_asignacion: expresion_asignacion1
     | PA expresion_asignacion1 PC

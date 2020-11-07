@@ -59,6 +59,6 @@ POR: '*';
 VALOR: ('-')?DIGITO+;
 
 
-IDENT: LETRA(LETRA | DIGITO)*;
+IDENT: LETRA(LETRA | DIGITO  | '_')*;
 
 
