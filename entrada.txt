@@ -4,6 +4,7 @@
 //      se encuentra.
 VARIABLES
     k: NUM;
+    j: LOG;
 
 SUBPROGRAMAS
     FUNCION mayor(SEQ(NUM) s) dev (NUM i,NUM max)

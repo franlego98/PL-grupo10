@@ -5,7 +5,7 @@ options{
 }
 
 
-programa: variables subprogramas instrucciones;
+programa: variables subprogramas instrucciones EOF;
 
 //VARIABLES
 variables: VARIABLES (decl_var PyC)*;
@@ -31,7 +31,7 @@ procedimiento: PROCEDIMIENTO identificador_procedimiento variables instrucciones
 
 identificador_procedimiento: IDENT PA argumentos_subprograma PC;
 
-identificador_funcion: IDENT PA argumentos_subprograma PC DEV PA argumentos_subprograma PC;
+identificador_funcion: IDENT PA (argumentos_subprograma)? PC DEV PA argumentos_subprograma PC;
 
 argumentos_subprograma: (tipo_elemental | SEQ PA tipo_elemental PC ) IDENT (COMA (tipo_elemental | SEQ PA tipo_elemental PC ) IDENT)*;
 //INSTRUCCIONES
@@ -89,4 +89,4 @@ ins_ruptura: RUPTURA PyC;
 ins_devolucion: DEV expresion_asignacion (expresion_asignacion)* PyC;
 
 //INS MOSTRAR
-ins_mostrar: MOSTRAR PA expresion_asignacion (COMA expresion_asignacion)* PC;
+ins_mostrar: MOSTRAR PA expresion_asignacion (COMA expresion_asignacion)* PC PyC;
