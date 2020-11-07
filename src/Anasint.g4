@@ -52,39 +52,29 @@ identificador_variables: IDENT CA expresion_asignacion CC |
     IDENT
     ;
 
-expresion_asignacion: expresion_asignacion1
-    | PA expresion_asignacion1 PC
-    ;
+expresion_asignacion: expresion_asignacion1 ((MAS | MENOS | POR) (expresion_asignacion))? ;
 
-expresion_asignacion1:
-    (expresion_asignacion2 | PA expresion_asignacion2 PC) ((MAS | MENOS | POR) (expresion_asignacion2 | PA expresion_asignacion2 PC))*
-    | IDENT CA expresion_asignacion2 CC
-    | IDENT PA expresion_asignacion2 PC
-    ;
-
-expresion_asignacion2: CA VALOR (COMA VALOR)* CC
-    | VALOR
-    | IDENT
-    | T
+expresion_asignacion1: T
     | F
+    | IDENT
+    | VALOR
+    | IDENT CA expresion_asignacion CC
+    | IDENT PA expresion_asignacion PC
+    | PA expresion_asignacion PC
     ;
 
 //INS CONDICION
 ins_condicion: SI PA expresion_condicional PC ENTONCES tipo_instruccion+ (SINO tipo_instruccion+)? FSI;
 
-expresion_condicional: expresion_condicional1
-    | PA expresion_condicional1 PC
-    ;
+//Condicionales
+expresion_condicional: expresion_condicional1 ((CONJUNCION | DISYUNCION | igualdades) (expresion_condicional))?;
 
-expresion_condicional1:
-    (expresion_condicional2 | PA expresion_condicional2 PC) ((CONJUNCION | DISYUNCION | igualdades) (expresion_condicional2 | PA expresion_condicional2 PC))*
-    | NEGACION expresion_condicional2
-    | IDENT PA expresion_asignacion2 PC
-    ;
-
-expresion_condicional2:  CIERTO
+expresion_condicional1: CIERTO
     | FALSO
-    | IDENT
+    | expresion_asignacion
+    | NEGACION expresion_condicional
+    | IDENT PA expresion_asignacion PC
+    | PA expresion_condicional PC
     ;
 
 igualdades: IGUAL | DESIGUAL | MAYOR | MENOR | MAYORIGUAL | MENORIGUAL;
