@@ -5,7 +5,7 @@ options{
 }
 
 
-programa: variables instrucciones subprogramas;
+programa: variables subprogramas instrucciones;
 
 //VARIABLES
 variables: VARIABLES (decl_var PyC)*;
@@ -33,8 +33,7 @@ identificador_procedimiento: IDENT PA argumentos_subprograma PC;
 
 identificador_funcion: IDENT PA argumentos_subprograma PC DEV PA argumentos_subprograma PC;
 
-argumentos_subprograma: (tipo_elemental | SEQ) IDENT (COMA (tipo_elemental | SEQ) IDENT)*;
-
+argumentos_subprograma: (tipo_elemental | SEQ PA tipo_elemental PC ) IDENT (COMA (tipo_elemental | SEQ PA tipo_elemental PC ) IDENT)*;
 //INSTRUCCIONES
 instrucciones: INSTRUCCIONES (tipo_instruccion)+;
 

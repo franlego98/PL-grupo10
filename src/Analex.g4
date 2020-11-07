@@ -32,6 +32,7 @@ FMIENTRAS: 'fmientras';
 RUPTURA: 'ruptura';
 FFUNCION: 'FFUNCION';
 FPROCEDIMIENTO: 'FPROCEDIMIENTO';
+MOSTRAR: 'mostrar';
 
 ASIG: '=';
 CONJUNCION: '&&';
