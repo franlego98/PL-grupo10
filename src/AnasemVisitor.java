@@ -2,42 +2,33 @@ import org.antlr.v4.runtime.RuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Set;
 
 public class AnasemVisitor extends AnasintBaseVisitor<Integer> {
     public final Integer TIPO_NUM = 100;
     public final Integer TIPO_LOG = 101;
 
-    HashMap<RuleContext,HashMap<String,String>> almacen_variables = new HashMap<RuleContext, HashMap<String, String>>();
-
-    HashMap<String,String> vars_tipo = new HashMap<String, String>();
+    HashMap<String,String> vars_global = new HashMap<String, String>();
 
     @Override
     public Integer visitPrograma(Anasint.ProgramaContext ctx){
-        visit(ctx.variables())
+        visit(ctx.variables());
+        System.out.println(vars_global.toString());
         visit(ctx.subprogramas());
         visit(ctx.instrucciones());
         return 0;
     }
 
-    public Integer visitVariables(Anasint.VariablesContext ctx){
-        for(Anasint.Decl_varContext v : ctx.decl_var()){
-            visitDecl_var(v,vars_tipo);
-        }
-
-        System.out.println("Variables parseadas!");
-        System.out.println(vars_tipo.toString());
-        return 0;
-    }
-
-    public Integer visitDecl_var(Anasint.Decl_varContext ctx,HashMap<String,String> local_variables) {
+    public Integer visitDecl_var(Anasint.Decl_varContext ctx) {
 
         //Decision de diseño 2
         for(String i : ctx.identificador_declaracion().getText().split(",")) {
-            if (local_variables.containsKey(i)){
-                System.out.println("Variable "+i+" declarada previamente como "+local_variables.get(i));
+            if (vars_global.containsKey(i)){
+                System.out.println("Variable "+i+" declarada previamente como "+vars_global.get(i));
                 continue;
             }
-            local_variables.put(i,ctx.tipo_de_dato().getText());
+            vars_global.put(i,ctx.tipo_de_dato().getText());
         }
         return 0;
     }
@@ -98,8 +89,6 @@ public class AnasemVisitor extends AnasintBaseVisitor<Integer> {
     }
 
     //Tipos de condicionales
-
-    @Override
     public Integer visitCondNegacion(Anasint.CondNegacionContext ctx) {
         if(visit(ctx.expresion_condicional()) != TIPO_LOG){
             System.err.println("La negación debe ser con variables tipo LOG!");
@@ -108,9 +97,8 @@ public class AnasemVisitor extends AnasintBaseVisitor<Integer> {
         return TIPO_LOG;
     }
 
-    @Override
     public Integer visitCondParentesis(Anasint.CondParentesisContext ctx) {
-        return visit(ctx.expresion_condicional());
+        return visitExpresion_condicional(ctx.expresion_condicional());
     }
 
     @Override
@@ -146,12 +134,10 @@ public class AnasemVisitor extends AnasintBaseVisitor<Integer> {
             return -1;
         }
 
-
-
-        if(vars_tipo.containsKey(ctx.IDENT().getText())){
-            if(vars_tipo.get(ctx.IDENT().getText()).equals("SEQ(LOG)")) {
+        if(vars_global.containsKey(ctx.IDENT().getText())){
+            if(vars_global.get(ctx.IDENT().getText()).equals("SEQ(LOG)")) {
                 return TIPO_LOG;
-            }else if(vars_tipo.get(ctx.IDENT().getText()).equals("SEQ(NUM)")) {
+            }else if(vars_global.get(ctx.IDENT().getText()).equals("SEQ(NUM)")) {
                 return TIPO_NUM;
             }else{
                 System.err.println("La variable "+ctx.IDENT().getText()+" no es una lista!");
@@ -170,10 +156,10 @@ public class AnasemVisitor extends AnasintBaseVisitor<Integer> {
 
     @Override
     public Integer visitAsigSimple(Anasint.AsigSimpleContext ctx) {
-        if(vars_tipo.containsKey(ctx.IDENT().getText())){
-            if(vars_tipo.get(ctx.IDENT().getText()).equals("LOG")) {
+        if(vars_global.containsKey(ctx.IDENT().getText())){
+            if(vars_global.get(ctx.IDENT().getText()).equals("LOG")) {
                 return TIPO_LOG;
-            }else if(vars_tipo.get(ctx.IDENT().getText()).equals("NUM")) {
+            }else if(vars_global.get(ctx.IDENT().getText()).equals("NUM")) {
                 return TIPO_NUM;
             }else{
                 System.err.println("La variable "+ctx.IDENT().getText()+" no debe ser una lista!");
