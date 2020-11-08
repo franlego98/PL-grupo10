@@ -13,11 +13,11 @@ decl_var: identificador_declaracion DP tipo_de_dato;
 
 identificador_declaracion: IDENT (COMA IDENT)*;
 
-tipo_de_dato: tipo_elemental | tipo_no_elemental;
-
-tipo_elemental: NUM | LOG;
-
-tipo_no_elemental: SEQ PA tipo_elemental PC;
+tipo_de_dato: NUM
+    | LOG
+    | SEQ PA NUM PC
+    | SEQ PA LOG PC
+    ;
 
 //SUBPROGRAMAS
 subprogramas: SUBPROGRAMAS (funcion | procedimiento)*;
@@ -55,30 +55,30 @@ identificador_variables: IDENT CA expresion_asignacion CC |
     ;
 
 //Operando de la derecha
-expresion_asignacion: expresion_asignacion1 ((MAS | MENOS | POR) (expresion_asignacion))? ;
+expresion_asignacion: expresion_asignacion1 (operadores_aritmeticos (expresion_asignacion))? ;
 
-expresion_asignacion1: T
-    | F
-    | IDENT
-    | VALOR
-    | IDENT CA expresion_asignacion CC //Llamada a una lista
-    | IDENT PA expresion_asignacion PC //Llamada a una funcion
-    | PA expresion_asignacion PC
+operadores_aritmeticos: MAS | MENOS | POR ;
+
+expresion_asignacion1: T #AsigTrue
+    | F #AsigFalse
+    | IDENT #AsigSimple
+    | VALOR #AsigExplicit
+    | IDENT CA expresion_asignacion CC #AsigLista
+    | IDENT PA expresion_asignacion PC #AsignFunc
+    | PA expresion_asignacion PC #AsigParentesis
     ;
 
 //INS CONDICION
 ins_condicion: SI PA expresion_condicional PC ENTONCES tipo_instruccion+ (SINO tipo_instruccion+)? FSI;
 
 //Condicionales
-expresion_condicional: expresion_condicional1 (operadores_binarios) (expresion_condicional))?;
+expresion_condicional: expresion_condicional1 (operadores_binarios (expresion_condicional))?;
 
-expresion_condicional1: CIERTO
-    | FALSO
-    | expresion_asignacion
-    | NEGACION expresion_condicional
-    | IDENT PA expresion_asignacion PC //Llamada a una funcion
-    | IDENT CA expresion_asignacion CC //Llamada a una lista
-    | PA expresion_condicional PC
+expresion_condicional1: CIERTO #CondCierto
+    | FALSO #CondFalse
+    | expresion_asignacion #CondVar
+    | NEGACION expresion_condicional #CondNegacion
+    | PA expresion_condicional PC #CondParentesis
     ;
 
 operadores_binarios: CONJUNCION | DISYUNCION | IGUAL | DESIGUAL | MAYOR | MENOR | MAYORIGUAL | MENORIGUAL;

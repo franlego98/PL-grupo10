@@ -3,16 +3,17 @@
 
 //      se encuentra.
 VARIABLES
-    k: NUM;
+    k,i,b: NUM;
     j: LOG;
 
 SUBPROGRAMAS
     FUNCION mayor(SEQ(NUM) s) dev (NUM i,NUM max)
         VARIABLES
-            j: NUM;
+            s: SEQ(NUM);
+            q: LOG;
         INSTRUCCIONES
             q = 10;
-            mientras(s[j]>max) hacer
+            mientras(!s[k]) hacer
                 i=j;
             fmientras
     FFUNCION
