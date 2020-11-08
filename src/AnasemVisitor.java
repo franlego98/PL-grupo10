@@ -8,9 +8,7 @@ public class AnasemVisitor extends AnasintBaseVisitor<Integer> {
     }
 
     public Integer visitVariables(Anasint.VariablesContext ctx){
-        for(int i = 0;i < ctx.children.size();i++){
-            visit(ctx.children.get(i));
-        }
+        System.out.println(ctx.decl_var(0).tipo_de_dato().tipo_elemental().LOG());
         return 0;
     }
 
