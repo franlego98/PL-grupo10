@@ -25,15 +25,18 @@ subprogramas: SUBPROGRAMAS (funcion | procedimiento)*;
 //SUBPROGRAMA FUNCION
 funcion: FUNCION identificador_funcion variables instrucciones FFUNCION;
 
-identificador_funcion: IDENT PA (argumentos_subprograma)? PC DEV PA argumentos_subprograma PC;
+identificador_funcion: IDENT PA (argumento_subprograma (COMA argumento_subprograma)*)? PC
+        DEV PA argumento_subprograma_dev (COMA argumento_subprograma_dev)* PC;
 
 //SUBPROGRAMA PROCEDIMIENTO
 procedimiento: PROCEDIMIENTO identificador_procedimiento variables instrucciones FPROCEDIMIENTO;
 
-identificador_procedimiento: IDENT PA argumentos_subprograma PC;
+identificador_procedimiento: IDENT PA (argumento_subprograma (COMA argumento_subprograma)*) PC;
 
 //Parte común funcion y procedimiento
-argumentos_subprograma: tipo_de_dato IDENT (COMA tipo_de_dato IDENT)*;
+argumento_subprograma_dev : tipo_de_dato IDENT ;
+
+argumento_subprograma: tipo_de_dato IDENT ;
 
 //INSTRUCCIONES
 instrucciones: INSTRUCCIONES (tipo_instruccion)+;
@@ -47,11 +50,12 @@ tipo_instruccion: ins_asignacion
     ;
 
 //INS ASIGNACION
-ins_asignacion: identificador_variables (COMA identificador_variables)* ASIG expresion_asignacion (COMA expresion_asignacion)* PyC;
+ins_asignacion: identificador_variables (COMA identificador_variables)*
+        ASIG expresion_asignacion (COMA expresion_asignacion)* PyC;
 
 //Operando de la izquierda
-identificador_variables: IDENT CA expresion_asignacion CC |
-    IDENT
+identificador_variables: IDENT CA expresion_asignacion CC #identLista
+    | IDENT #identVarSimple
     ;
 
 //Operando de la derecha
@@ -64,7 +68,7 @@ expresion_asignacion1: T #AsigTrue
     | IDENT #AsigSimple
     | VALOR #AsigExplicit
     | IDENT CA expresion_asignacion CC #AsigLista
-    | IDENT PA expresion_asignacion PC #AsignFunc
+    | IDENT PA (expresion_asignacion (COMA expresion_asignacion)*)? PC #AsignFunc
     | PA expresion_asignacion PC #AsigParentesis
     ;
 

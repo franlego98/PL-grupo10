@@ -7,16 +7,32 @@ VARIABLES
     j: LOG;
 
 SUBPROGRAMAS
-    FUNCION mayor(SEQ(NUM) s) dev (NUM i,NUM max)
+    FUNCION mayor(SEQ(NUM) s,LOG abc) dev (NUM res1,NUM max)
         VARIABLES
-            s: SEQ(NUM);
+            sa2: SEQ(NUM);
             q: LOG;
+            qqq: LOG;
         INSTRUCCIONES
-            q = 10;
             mientras(!s[k]) hacer
                 i=j;
             fmientras
     FFUNCION
 
+    FUNCION func2() dev (LOG func2_res)
+        VARIABLES
+            qa1: NUM;
+            q: NUM;
+        INSTRUCCIONES
+            qa1 = 50;
+            q = 10;
+    FFUNCION
+
+    PROCEDIMIENTO prod1(NUM arg1)
+        VARIABLES
+            k: NUM;
+        INSTRUCCIONES
+            k=T;
+    FPROCEDIMIENTO
+
 INSTRUCCIONES
-    k[1]=q;
+    k=F;
