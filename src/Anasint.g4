@@ -70,6 +70,7 @@ expresion_asignacion1: T #AsigTrue
     | IDENT CA expresion_asignacion CC #AsigLista
     | IDENT PA (expresion_asignacion (COMA expresion_asignacion)*)? PC #AsignFunc
     | PA expresion_asignacion PC #AsigParentesis
+    | CA (expresion_asignacion (COMA expresion_asignacion)*)? CC #AsigExplicitLista
     ;
 
 //INS CONDICION
