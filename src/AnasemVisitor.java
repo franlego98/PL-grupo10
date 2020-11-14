@@ -24,15 +24,21 @@ public class AnasemVisitor extends AnasintBaseVisitor<Integer> {
         }
     }
 
+    //Decision de diseño 1
     HashMap<String,Integer> vars_global = new HashMap<String, Integer>();
     HashMap<String,Integer> vars_local = null;
 
-    //Necesito una lista que mantenga el orden porque luego tengo que comprobar en que posicion esta
+    //Decision de diseño 3
     HashMap<String,LinkedList<Parametro>> funciones_parametros = new HashMap<String, LinkedList<Parametro>>();
     HashMap<String,LinkedList<Parametro>> funciones_devuelve = new HashMap<String, LinkedList<Parametro>>();
 
+    //Decision de diseño 4
     String subprograma_actual;
+
+    //Decision de diseño 6
     Integer numero_devs;
+
+    //Decision de diseño 8
     Boolean en_iteracion;
 
     @Override
@@ -50,6 +56,7 @@ public class AnasemVisitor extends AnasintBaseVisitor<Integer> {
     public Integer visitDecl_var(Anasint.Decl_varContext ctx) {
 
         for(String i : ctx.identificador_declaracion().getText().split(",")) {
+            //Decision de diseño 6
             if (vars_global.containsKey(i)){
                 System.err.println("Variable "+i+" declarada previamente como "+vars_global.get(i));
                 continue;
@@ -63,6 +70,7 @@ public class AnasemVisitor extends AnasintBaseVisitor<Integer> {
     public Integer visitDecl_var(Anasint.Decl_varContext ctx,HashMap<String,Integer> map_vars) {
 
         for(String i : ctx.identificador_declaracion().getText().split(",")) {
+            //Decision de diseño 6
             if (map_vars.containsKey(i)){
                 System.err.println("Variable "+i+" declarada previamente como "+map_vars.get(i));
             }else if(vars_global.containsKey(i)){
@@ -132,6 +140,7 @@ public class AnasemVisitor extends AnasintBaseVisitor<Integer> {
 
     @Override
     public Integer visitFuncion(Anasint.FuncionContext ctx) {
+        //Decision de diseño 2
         vars_local = new HashMap<String, Integer>();
         numero_devs = 0;
 
@@ -141,6 +150,7 @@ public class AnasemVisitor extends AnasintBaseVisitor<Integer> {
             visitDecl_var(arg,vars_local);
         }
 
+        //Decision de diseño 2
         vars_global.putAll(vars_local);
 
         visit(ctx.instrucciones());
@@ -153,6 +163,7 @@ public class AnasemVisitor extends AnasintBaseVisitor<Integer> {
             System.err.println("Deberia haber un dev en la función!");
         }
 
+        //Decision de diseño 2
         vars_local = null;
         subprograma_actual = null;
         numero_devs = 0;
@@ -162,6 +173,7 @@ public class AnasemVisitor extends AnasintBaseVisitor<Integer> {
 
     @Override
     public Integer visitProcedimiento(Anasint.ProcedimientoContext ctx) {
+        //Decision de diseño 2
         vars_local = new HashMap<String, Integer>();
 
         visit(ctx.identificador_procedimiento());
@@ -170,6 +182,7 @@ public class AnasemVisitor extends AnasintBaseVisitor<Integer> {
             visitDecl_var(arg,vars_local);
         }
 
+        //Decision de diseño 2
         vars_global.putAll(vars_local);
 
         visit(ctx.instrucciones());
@@ -178,6 +191,7 @@ public class AnasemVisitor extends AnasintBaseVisitor<Integer> {
             vars_global.remove(k);
         }
 
+        //Decision de diseño 2
         vars_local = null;
 
         return 0;
@@ -186,8 +200,14 @@ public class AnasemVisitor extends AnasintBaseVisitor<Integer> {
     @Override
     public Integer visitIdentificador_funcion(Anasint.Identificador_funcionContext ctx) {
         String nombre_subprograma = ctx.IDENT().getText();
+
+        if(subprograma_actual != null){
+            System.err.println("No se puede definir un subprograma dentro de otro subprograma!");
+            return -1;
+        }
         subprograma_actual = nombre_subprograma;
 
+        //Decision de diseño 10
         if(funciones_parametros.containsKey(nombre_subprograma)){
             System.out.println("Subprograma "+nombre_subprograma+" definido previamente!");
             return -1;
@@ -199,8 +219,7 @@ public class AnasemVisitor extends AnasintBaseVisitor<Integer> {
             aux.nombre = arg.IDENT().getText();
             aux.tipo = parser_tipo(arg.tipo_de_dato().getText());
 
-            //Vemos que no esta la variable ni en las variables locales ni globales
-            //Tambien aprovechamos para añadirlas a las variables locales
+            //Decision de diseño 7
             if(parametros_in.stream().anyMatch(x -> x.nombre.equals(aux.nombre))) {
                 System.err.println("Variable ya definida!");
                 return -1;
@@ -220,7 +239,7 @@ public class AnasemVisitor extends AnasintBaseVisitor<Integer> {
             aux.nombre = arg.IDENT().getText();
             aux.tipo = parser_tipo(arg.tipo_de_dato().getText());
 
-            //Vemos que no esta la variable ni en las variables locales ni globales
+            //Decision de diseño 7
             if(parametros_out.stream().anyMatch(x -> x.nombre.equals(aux.nombre))) {
                 System.err.println("Variable ya definida!");
                 return -1;
@@ -241,6 +260,14 @@ public class AnasemVisitor extends AnasintBaseVisitor<Integer> {
     public Integer visitIdentificador_procedimiento(Anasint.Identificador_procedimientoContext ctx) {
         String nombre_subprograma = ctx.IDENT().getText();
 
+        if(subprograma_actual != null){
+            System.err.println("No se puede definir un subprograma dentro de otro subprograma!");
+            return -1;
+        }
+
+        subprograma_actual = nombre_subprograma;
+
+        //Decision de diseño 10
         if(funciones_parametros.containsKey(nombre_subprograma)){
             System.out.println("Subprograma "+nombre_subprograma+" definido previamente!");
             return -1;
@@ -252,8 +279,7 @@ public class AnasemVisitor extends AnasintBaseVisitor<Integer> {
             aux.nombre = arg.IDENT().getText();
             aux.tipo = parser_tipo(arg.tipo_de_dato().getText());
 
-            //Vemos que no esta la variable ni en las variables locales ni globales
-            //Tambien aprovechamos para añadirlas a las variables locales
+            //Decision de diseño 7
             if(parametros_in.stream().anyMatch(x -> x.nombre.equals(aux.nombre))) {
                 System.err.println("Variable ya definida!");
                 return -1;
@@ -266,6 +292,8 @@ public class AnasemVisitor extends AnasintBaseVisitor<Integer> {
             }
         }
         funciones_parametros.put(nombre_subprograma,parametros_in);
+
+        subprograma_actual=null;
 
         return 0;
     }
@@ -430,6 +458,7 @@ public class AnasemVisitor extends AnasintBaseVisitor<Integer> {
         while(ids < idents.size() && vals < valores.size()){
             Integer valor_actual = visit(valores.get(vals));
             Integer ident_actual = visit(idents.get(ids));
+
             if(valor_actual == DEV_NADA){
                 System.err.println("Asginacion sin valor!");
                 return -1;
@@ -442,6 +471,7 @@ public class AnasemVisitor extends AnasintBaseVisitor<Integer> {
                 for( Parametro p :funciones_devuelve.get(nombreSubprograma)){
                     ident_actual = visit(idents.get(ids));
 
+                    //Decision de diseño 11
                     if(p.tipo != visit(idents.get(ids))){
                         System.err.println("Asginacion mal tipada");
                         return -1;
@@ -466,12 +496,15 @@ public class AnasemVisitor extends AnasintBaseVisitor<Integer> {
 
     @Override
     public Integer visitIns_devolucion(Anasint.Ins_devolucionContext ctx) {
+        //Decision de diseño 6
         numero_devs++;
 
+        //Decision de diseño 5
         if(subprograma_actual == null){
             System.err.println("No se puede usar la instruccion dev fuera de una funcion!");
             return -1;
         }else{
+            //Decision de diseño 5
             List<Parametro> vals = funciones_devuelve.get(subprograma_actual);
             if(vals.size() != ctx.expresion_asignacion().size()){
                 System.err.println("Se espereban " + vals.size() + " parametro(s) recibido(s) " +
@@ -479,7 +512,7 @@ public class AnasemVisitor extends AnasintBaseVisitor<Integer> {
                 return -1;
             }
 
-            //Comprobamos que el tipo de las variables coincide
+            //Decision de diseño 5
             for (int i = 0; i < vals.size(); i++) {
                 if(visit(ctx.expresion_asignacion(i)) != vals.get(i).tipo ){
                     System.err.println("La funcion no devuelve esos valores!");
@@ -492,6 +525,7 @@ public class AnasemVisitor extends AnasintBaseVisitor<Integer> {
 
     @Override
     public Integer visitIns_iteracion(Anasint.Ins_iteracionContext ctx) {
+        //Decision de diseño 8
         en_iteracion = true;
         super.visitIns_iteracion(ctx);
         en_iteracion = false;
@@ -500,6 +534,7 @@ public class AnasemVisitor extends AnasintBaseVisitor<Integer> {
 
     @Override
     public Integer visitIns_ruptura(Anasint.Ins_rupturaContext ctx) {
+        //Decision de diseño 8
         if(!en_iteracion){
             System.err.println("No se puede hacer una ruptura fuera de un bucle!");
         }
