@@ -27,7 +27,7 @@ SUBPROGRAMAS
             q: LOG;
         INSTRUCCIONES
             qa1 = 50;
-            dev 10;
+            dev 10,T;
     FFUNCION
 
     PROCEDIMIENTO prod1(NUM arg1)
@@ -38,5 +38,5 @@ SUBPROGRAMAS
     FPROCEDIMIENTO
 
 INSTRUCCIONES
-    k,a,j = func2(),T;
+    k,j = func2();
     k=-25;
