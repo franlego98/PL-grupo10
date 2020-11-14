@@ -49,12 +49,11 @@ public class AnasemVisitor extends AnasintBaseVisitor<Integer> {
 
     public Integer visitDecl_var(Anasint.Decl_varContext ctx) {
 
-        //Decision de diseño 2
         for(String i : ctx.identificador_declaracion().getText().split(",")) {
             if (vars_global.containsKey(i)){
                 System.err.println("Variable "+i+" declarada previamente como "+vars_global.get(i));
                 continue;
-            }else {
+            }else{
                 vars_global.put(i, ctx.tipo_de_dato().getText());
             }
         }
@@ -62,8 +61,7 @@ public class AnasemVisitor extends AnasintBaseVisitor<Integer> {
     }
 
     public Integer visitDecl_var(Anasint.Decl_varContext ctx,HashMap<String,String> map_vars) {
-
-        //Decision de diseño 2
+        
         for(String i : ctx.identificador_declaracion().getText().split(",")) {
             if (map_vars.containsKey(i)){
                 System.err.println("Variable "+i+" declarada previamente como "+map_vars.get(i));

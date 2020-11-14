@@ -21,7 +21,7 @@ SUBPROGRAMAS
             dev 1,k;
     FFUNCION
 
-    FUNCION func2() dev (NUM res2)
+    FUNCION func2() dev (NUM res2,LOG a)
         VARIABLES
             qa1: NUM;
             q: LOG;
@@ -38,5 +38,5 @@ SUBPROGRAMAS
     FPROCEDIMIENTO
 
 INSTRUCCIONES
-    k,j=func2(),T;
+    k,a,j = func2(),T;
     k=-25;
