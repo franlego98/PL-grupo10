@@ -33,7 +33,7 @@ public class Principal {
         frame.setVisible(true);
 
         //Analizador semantic
-        AnasemVisitor anasem = new AnasemVisitor();
+        Anasem anasem = new Anasem();
         anasem.visit(tree);
     }
 }
