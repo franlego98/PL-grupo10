@@ -86,7 +86,10 @@ public class AnasemVisitor extends AnasintBaseVisitor<Integer> {
     @Override
     public Integer visitExpresion_asignacion(Anasint.Expresion_asignacionContext ctx) {
         if(ctx.operadores_aritmeticos() != null){
-            //Asignacion Binaria
+            if(visit(ctx.expresion_asignacion1()) != TIPO_NUM || visit(ctx.expresion_asignacion()) != TIPO_NUM) {
+                System.err.println("La expresion debe ser entre dos tipos numericos!");
+            }
+
             return TIPO_NUM;
         }else{
             //Asignacion Unaria
@@ -140,7 +143,7 @@ public class AnasemVisitor extends AnasintBaseVisitor<Integer> {
 
     @Override
     public Integer visitFuncion(Anasint.FuncionContext ctx) {
-        //Decision de diseño 2
+        //Decision de diseño 1
         vars_local = new HashMap<String, Integer>();
         numero_devs = 0;
 
@@ -150,7 +153,7 @@ public class AnasemVisitor extends AnasintBaseVisitor<Integer> {
             visitDecl_var(arg,vars_local);
         }
 
-        //Decision de diseño 2
+        //Decision de diseño 1
         vars_global.putAll(vars_local);
 
         visit(ctx.instrucciones());
