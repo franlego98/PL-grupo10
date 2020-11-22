@@ -1,0 +1,258 @@
+//   OBJETIVO: especificación abstracta y declarativa de los errores semánticos
+//   propuestos:
+
+//ERRORES:
+
+//    Error 1: una condición no puede tener un valor distinto a VERDADERO, FALSO o 
+//    INDEFINIDO.
+
+//    Error 2: las variables deberán recibir el mismo tipo de dato del que han   
+//    sido definidas con anterioridad, además de coincidir en número de datos 
+//    (Implícitamente, una asignación será válida si el valor que le corresponde a 
+//    cada variable es del mismo tipo);
+
+//    Error 3: Un subprograma debe llamarse con el mismo número y el mismo tipo de 
+//    argumentos que en su definición.
+
+//    Error 4: Si se llama a la instrucción devolver, deberá estar dentro de una 
+//    función, y devolver el mismo número y tipo de valores que en su           
+//    definición.(así mismo, todas las funciones tienen que tener una instrucción 
+//    devolver).
+
+//    Error 5: Si se llama a la instrucción ruptura, deberá estar dentro de una 
+//    iteración.
+
+//    Error 6: Las variables globales pueden ser usadas en cualquier parte del 
+//    programa y las variables locales pueden ser usadas solo en la parte de su 
+//    subprograma que ha sido definida.
+
+//    Error 7: Cuando se asigne una secuencia a una variable, la secuencia       
+//    expresada debe tener todos sus elementos del mismo tipo. Así mismo, si la  
+//    secuencia expresada está vacía, no se considerará válida.
+
+//    Error 8: No se pueden anidar secuencias.
+
+//    Error 9: No se pueden anidar subprogramas.
+
+//    Error 10: No se pueden repetir las declaraciones de las variables.
+
+//    Error 11: Dos subprogramas no pueden tener el mismo identificador.
+
+//    Error 12: La declaración de una variable debe estar previa a su evaluación.
+
+//    Error 13: No se puede llamar a un subprograma que no ha sido declarado 
+//    previamente.
+
+//DECISIONES DE DISEÑO:
+
+//    ERROR 2, 6, 10 y 12:
+//           *Decisión 1: Se crea una tabla para almacenar los identificadores de  
+//    las variables globales y su correspondiente tipo. 
+
+//    variable: tabla_vars
+
+//       variables: VARIABLES (decl_var PyC)*;
+
+//      decl_var: ident_declaracion DP tipo_de_dato;
+//        {aquí es donde declaramos finalmente las variables}
+
+
+
+//    ERROR 2:
+//        *Decisión 2: Para cada expresión se comprobará que sus tipos son      
+//    iguales.
+        
+//    funcion visitExpresion_asignacion(expresion){
+//        si tiene operadores aritmeticos entonces
+//            devolver tipo NUM
+//        si no
+//            asignación unitaria
+
+
+//    	funcion visitExpresion_condicional(expresion){
+//		si tiene operadores binarios entonces
+//			si tiene operadores binarios (<, >, >= o <=) entonces
+//				si las dos expresiones no son números entonces
+//					Devolver error
+//			si tiene operadores binarios (&& o ||) entonces
+//				si las dos expresiones no son tipo lógico entonces
+//					Devolver error
+//			si tiene operadores binarios (== o !=) entonces
+//				si las expresiones son de distintos tipo entonces
+//					Devolver error
+//			si no 
+//				asignación unitaria
+//			devolver tipo Log
+//	}    
+
+
+
+//    ERROR 3 y 4:
+//        *Decisión 3: Se crean dos tablas, una que asocia al identificador de  
+//    cada subprograma una lista de los valores de entrada, y otra, una lista para 
+//    los valores de salida.
+
+//    subprogramas: SUBPROGRAMAS (funcion | procedimiento)*;{debemos observar los 
+//    dos casos posibles de un subprograma, tanto la función como el           
+//    procedimiento; para eso vamos a crear dos tablas nuevas, una de parámetros 
+//    de entrada y otra de parámetros de salida}
+
+//    variables_entrada : funciones_parametros
+//    varriables_salida : funciones_devuelve
+
+//    funcion: FUNCION identificador_funcion variables{almacenar en           
+//    tabla_vars las variables locales de la función} instrucciones FFUNCION;
+
+//    identificador_funcion: IDENT PA (argumento_subprograma{esta parte es la que 
+//    entraría en la tabla de funciones_parametros por parte de las funciones}   
+//    (COMA argumento_subprograma)*)? PC DEV PA argumento_subprograma_dev{esta       
+//    parte es la que devuelve los valores de salida de la función} (COMA       
+//    argumento_subprograma_dev)* PC;
+
+//    argumento_subprograma_dev : tipo_de_dato.IDENT ;{almacenar en           
+//    funciones_devuelve(identificador de funcion, (nombre de variable, tipo))}
+
+//    argumento_subprograma: tipo_de_dato.IDENT ;{almacenar en                 
+//    funciones_parametros(identificador de funcion o preocedimiento, (nombre de 
+//    variable, tipo))}
+
+//    procedimiento: PROCEDIMIENTO identificador_procedimiento variables{almacenar 
+//    en tabla_vars las variables locales del procedimiento} instrucciones       
+//    FPROCEDIMIENTO;
+
+//    identificador_procedimiento: IDENT PA (argumento_subprograma (COMA       
+//    argumento_subprograma)*){esta parte es la parte que entraría en la tabla de 
+//    funciones_parametros por parte de los procedimientos} PC; 
+
+
+
+//    ERROR 4:
+//        *Decisión 4: Hay un flag global (subprograma_actual) que indica el 
+//     identificador de la función que estamos definiendo. Dicho flag será nulo en 
+//    caso de que no estemos dentro de la definición de una función.
+
+//    ident_procedimiento : IDENT { subprograma_actual = IDENT } 
+//    (argumento_subprograma (COMA argumento_subprograma)*) PC;
+
+
+//        *Decisión 5: Cada vez que se evalúe una instrucción “dev”, se
+//    comprobará que el flag subprograma_actual no es nulo, en dicho caso es un  
+//    fallo. En caso de que no sea nulo, se comprobará que los valores de la    
+//    instrucción serán los mismo que los de “funciones_devuelve” para dicho flag.
+
+//    instruccion_dev : 
+//	Si subprograma_actual = nulo entonces
+//    	devolver error
+
+//	si no
+//  		si distinto número de valores en dev que en declaración entonces
+// 	       		devolver error
+//	para cada valor del dev
+//   		si no coincide el tipo del valor con el esperado entonces
+//        		devolver error
+    
+            
+//        *Decisión 6: Hay un contador global (numero_devs) que se incrementa con 
+//    cada instrucción dev. Al inicio de la evaluación de las instrucciones de una 
+//     función se pondrá a cero, y después de la evaluación de las instrucciones de 
+//     una función se comprobará que dicho contador vale 1.
+
+//    contador_devs : numero_devs
+
+//    funcion: FUNCION identificador_funcion variables instrucciones{en este punto 
+//    es en el que vamos a ahondar para esta decisión de diseño} FFUNCION;
+
+//    instrucciones: INSTRUCCIONES (tipo_instruccion)+;
+
+//    tipo_instruccion: ins_asignacion | ins_condicion | ins_iteracion |       
+//    ins_ruptura | ins_devolucion | ins_mostrar;
+
+//    ins_devolucion: DEV{poner numero_devs a 1} expresion_asignacion (COMA       
+//    expresion_asignacion)* PyC;{revisar que numero_devs == 1 y que por lo tanto 
+//    no hay más que un dev por función}
+
+
+
+//    ERROR 5:
+//        *Decisión 7: Hay un flag global (en_iteracion) que nos indica si 
+//     estamos en un “mientras”. Dicho flag se tendrá en cuenta a la hora de       
+//    evaluar cada instrucción “ruptura” y saltará un error en caso de que ese       
+//    flag sea nulo.
+
+//    ins_iteracion : MIENTRAS { en_iteracion = 1 } PA expresion_condicional PC 
+//    HACER tipo_instruccion + FMIENTRAS; { en_iteracion = 0 }
+
+//    ins_ruptura: { si en_iteracion = 0 lanzar error “no es una iteración” } 
+//    RUPTURA PyC;
+
+
+//    ERROR 6:
+//        *Decisión 8: Al definir un subprograma, se usará un almacén de       
+//    variables auxiliares para tener constancia de las variables locales. Estas   
+//    variables locales se añadirán a la tabla global antes de evaluar las       
+//    instrucciones de un subprograma y se eliminarán posteriormente.
+    
+//    vars_local = mapa de variables (como tabla_vars)
+
+//    identificador_procedimiento : IDENT PA argumentos_subprograma     
+//        { añadir (argumentos_subprograma.IDENT,argumentos_subprograma.TIPO) en vars_local } PC;
+
+//    identificador_funcion: IDENT PA (argumentos_subprograma)? PC DEV PA
+//    argumentos_subprograma_dev? 
+//        { si argumentos_subprograma.IDENT || 
+//            argumentos_subprograma_dev.IDENT en tabla_vars lanzar error 
+//            “identificador ya declarado” }
+//    PC;
+
+//     instrucciones: INSTRUCCIONES
+
+//    { Tabla_vars = Tabla_vars - Vars_local }
+
+//    vars_local = null}
+
+
+
+    
+
+
+//    ERROR 10:
+//        *Decisión 9: Cada vez que se declare una variable se comprobará que no 
+//    está en la tabla global de variables.
+
+//       variables: VARIABLES (decl_var PyC)*;
+
+//      decl_var: ident_declaracion DP tipo_de_dato;
+//        {  por cada ident_declaracion i, hacer:
+//            comprobar que i no esté en tabla_vars
+//            si no está, añadir (i,tipo_de_dato) a tabla vars        
+//          }
+
+
+
+//        *Decisión 10: Cada vez que se defina un subprograma se comprobará que  
+//    las variables que recibe y devuelve no se han definido previamente.
+
+
+//    identificador_procedimiento : IDENT PA argumentos_subprograma     
+//        { si argumentos_subprograma.IDENT en tabla_vars lanzar error 
+//            “identificador ya declarado” } 
+//    PC;
+
+//    identificador_funcion: IDENT PA (argumentos_subprograma)? PC DEV PA
+//    argumentos_subprograma_dev? 
+//        { si argumentos_subprograma.IDENT || argumentos_subprograma_dev.IDENT 
+//            en tabla_vars lanzar error “identificador ya declarado” } 
+//    PC;
+
+//    ERROR 11 y 13:
+//         *Decisión 11: Cada vez que se defina un subprograma su identificador 
+//    no deberá existir en “funciones_parametros”.
+
+//    identificador_procedimiento: IDENT PA argumentos_subprograma PC;
+//    {  si IDENT en funciones_parametros lanzar error “Subprograma ya definido” }
+
+//    identificador_funcion: IDENT PA (argumentos_subprograma)? PC DEV PA 
+//    argumentos_subprograma PC; 
+//        { si IDENT en funciones_parametros lanzar error “Subprograma ya 
+//            definido” }
+
