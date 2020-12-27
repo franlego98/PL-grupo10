@@ -32,7 +32,7 @@ public class Principal {
         frame.setSize(500,400);
         frame.setVisible(true);
 
-        //Analizador semantic
+        //Analizador semantico
         AnasemVisitor anasem = new AnasemVisitor();
         anasem.visit(tree);
     }

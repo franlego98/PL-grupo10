@@ -1,0 +1,5 @@
+si(s[i]>max) entonces  //condicion
+    max=s[i];            //bloque si se cumple la condicion
+sino
+    max=0;   //bloque si no se cumple la condicion
+fsi

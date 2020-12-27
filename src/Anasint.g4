@@ -4,7 +4,6 @@ options{
     tokenVocab = Analex;
 }
 
-
 programa: variables subprogramas instrucciones EOF;
 
 //VARIABLES
@@ -14,11 +13,11 @@ decl_var: identificador_declaracion DP tipo_de_dato;
 
 identificador_declaracion: IDENT (COMA IDENT)*;
 
-tipo_de_dato: tipo_elemental | tipo_no_elemental;
-
-tipo_elemental: NUM | LOG;
-
-tipo_no_elemental: SEQ PA (tipo_elemental) PC;
+tipo_de_dato: NUM
+    | LOG
+    | SEQ PA NUM PC
+    | SEQ PA LOG PC
+    ;
 
 //SUBPROGRAMAS
 subprogramas: SUBPROGRAMAS (funcion | procedimiento)*;
@@ -26,14 +25,19 @@ subprogramas: SUBPROGRAMAS (funcion | procedimiento)*;
 //SUBPROGRAMA FUNCION
 funcion: FUNCION identificador_funcion variables instrucciones FFUNCION;
 
+identificador_funcion: IDENT PA (argumento_subprograma (COMA argumento_subprograma)*)? PC
+        DEV PA argumento_subprograma_dev (COMA argumento_subprograma_dev)* PC;
+
 //SUBPROGRAMA PROCEDIMIENTO
 procedimiento: PROCEDIMIENTO identificador_procedimiento variables instrucciones FPROCEDIMIENTO;
 
-identificador_procedimiento: IDENT PA argumentos_subprograma PC;
+identificador_procedimiento: IDENT PA (argumento_subprograma (COMA argumento_subprograma)*) PC;
 
-identificador_funcion: IDENT PA (argumentos_subprograma)? PC DEV PA argumentos_subprograma PC;
+//Parte común funcion y procedimiento
+argumento_subprograma_dev : tipo_de_dato IDENT ;
 
-argumentos_subprograma: (tipo_elemental | SEQ PA tipo_elemental PC ) IDENT (COMA (tipo_elemental | SEQ PA tipo_elemental PC ) IDENT)*;
+argumento_subprograma: tipo_de_dato IDENT ;
+
 //INSTRUCCIONES
 instrucciones: INSTRUCCIONES (tipo_instruccion)+;
 
@@ -45,39 +49,46 @@ tipo_instruccion: ins_asignacion
     | ins_mostrar
     ;
 
-//INS ASIGNACION
-ins_asignacion: identificador_variables (COMA identificador_variables)* ASIG expresion_asignacion (COMA expresion_asignacion)* PyC;
+tipo_instruccion2: tipo_instruccion;
 
-identificador_variables: IDENT CA expresion_asignacion CC |
-    IDENT
+//INS ASIGNACION
+ins_asignacion: identificador_variables (COMA identificador_variables)*
+        ASIG expresion_asignacion (COMA expresion_asignacion)* PyC;
+
+//Operando de la izquierda
+identificador_variables: IDENT CA expresion_asignacion CC #identLista
+    | IDENT #identVarSimple
     ;
 
-expresion_asignacion: expresion_asignacion1 ((MAS | MENOS | POR) (expresion_asignacion))? ;
+//Operando de la derecha
+expresion_asignacion: expresion_asignacion1 (operadores_aritmeticos (expresion_asignacion))? ;
 
-expresion_asignacion1: T
-    | F
-    | IDENT
-    | VALOR
-    | IDENT CA expresion_asignacion CC
-    | IDENT PA expresion_asignacion PC
-    | PA expresion_asignacion PC
+operadores_aritmeticos: MAS | MENOS | POR ;
+
+expresion_asignacion1: T #AsigTrue
+    | F #AsigFalse
+    | IDENT #AsigSimple
+    | VALOR #AsigExplicit
+    | IDENT CA expresion_asignacion CC #AsigLista
+    | IDENT PA (expresion_asignacion (COMA expresion_asignacion)*)? PC #AsignFunc
+    | PA expresion_asignacion PC #AsigParentesis
+    | CA (expresion_asignacion (COMA expresion_asignacion)*)? CC #AsigExplicitLista
     ;
 
 //INS CONDICION
-ins_condicion: SI PA expresion_condicional PC ENTONCES tipo_instruccion+ (SINO tipo_instruccion+)? FSI;
+ins_condicion: SI PA expresion_condicional PC ENTONCES tipo_instruccion+ (SINO tipo_instruccion2+)? FSI;
 
 //Condicionales
-expresion_condicional: expresion_condicional1 ((CONJUNCION | DISYUNCION | igualdades) (expresion_condicional))?;
+expresion_condicional: expresion_condicional1 (operadores_binarios (expresion_condicional))?;
 
-expresion_condicional1: CIERTO
-    | FALSO
-    | expresion_asignacion
-    | NEGACION expresion_condicional
-    | IDENT PA expresion_asignacion PC
-    | PA expresion_condicional PC
+expresion_condicional1: CIERTO #CondCierto
+    | FALSO #CondFalse
+    | expresion_asignacion #CondVar
+    | NEGACION expresion_condicional #CondNegacion
+    | PA expresion_condicional PC #CondParentesis
     ;
 
-igualdades: IGUAL | DESIGUAL | MAYOR | MENOR | MAYORIGUAL | MENORIGUAL;
+operadores_binarios: CONJUNCION | DISYUNCION | IGUAL | DESIGUAL | MAYOR | MENOR | MAYORIGUAL | MENORIGUAL;
 
 //INS ITERACION
 ins_iteracion: MIENTRAS PA expresion_condicional PC HACER tipo_instruccion+ FMIENTRAS;
@@ -86,7 +97,7 @@ ins_iteracion: MIENTRAS PA expresion_condicional PC HACER tipo_instruccion+ FMIE
 ins_ruptura: RUPTURA PyC;
 
 //INS DEVOLUCION
-ins_devolucion: DEV expresion_asignacion (expresion_asignacion)* PyC;
+ins_devolucion: DEV expresion_asignacion (COMA expresion_asignacion)* PyC;
 
 //INS MOSTRAR
 ins_mostrar: MOSTRAR PA expresion_asignacion (COMA expresion_asignacion)* PC PyC;

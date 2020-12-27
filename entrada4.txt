@@ -1,0 +1,4 @@
+VARIABLES
+    x:NUM;
+INSTRUCCIONES
+    x=x+1 //error x+1 no tiene valorporque x no tiene valor

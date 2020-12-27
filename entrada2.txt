@@ -1,0 +1,4 @@
+VARIABLES
+i,max,min:NUM;//i,max y min son variables numéricas y no pueden cambiar su tipo a lo largo
+//del programa
+s:SEQ(NUM);//similarmente, s es una secuencia de números
