@@ -7,11 +7,7 @@ public class Interprete extends AnasintBaseVisitor<Integer>{
 
     public Integer visitPrograma(Anasint.ProgramaContext ctx){
         visit(ctx.variables());
-        //System.out.println(vars_global.toString());
         visit(ctx.subprogramas());
-        //System.out.println(funciones_parametros.toString());
-        //System.out.println(funciones_devuelve.toString());
-
         visit(ctx.instrucciones());
         return 0;
     }
