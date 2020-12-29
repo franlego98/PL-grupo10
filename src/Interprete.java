@@ -1,9 +1,50 @@
 import java.util.ArrayList;
 import java.util.List;
 
-public class Interprete {
+public class Interprete extends AnasintBaseVisitor<Integer>{
 
     List<List<Tupla>> vars_globales = new ArrayList<>();
+
+    public Integer visitPrograma(Anasint.ProgramaContext ctx){
+        visit(ctx.variables());
+        //System.out.println(vars_global.toString());
+        visit(ctx.subprogramas());
+        //System.out.println(funciones_parametros.toString());
+        //System.out.println(funciones_devuelve.toString());
+
+        visit(ctx.instrucciones());
+        return 0;
+    }
+
+    public Integer visitDecl_var(Anasint.Decl_varContext ctx){
+        String ident;
+        String tipo;
+        for(String i : ctx.identificador_declaracion().getText().split(",")) {
+            ident = i;
+            tipo = ctx.tipo_de_dato().getText();
+            declarar_variable(ident, tipo);
+        }
+        return 0;
+    }
+
+    public Integer visitFuncion(Anasint.FuncionContext ctx){
+        //Decision 1.2
+        vars_globales.add(new ArrayList<Tupla>());
+        visitIdentificador_funcion(ctx.identificador_funcion());
+        return 0;
+    }
+
+    public Integer visitIdentificador_funcion(Anasint.Identificador_funcionContext ctx){
+        String ident;
+        String tipo;
+        for(Anasint.Argumento_subprogramaContext i : ctx.argumento_subprograma()) {
+            ident = i.IDENT().getText();
+            tipo = i.tipo_de_dato().getText();
+            declarar_variable(ident, tipo);
+        }
+
+        return 0;
+    }
 
     //GUARDAR UNA VARIABLE AL DECLARARLA
     void declarar_variable(String ident, String tipo){
