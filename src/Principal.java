@@ -35,5 +35,9 @@ public class Principal {
         //Analizador semantico
         AnasemVisitor anasem = new AnasemVisitor();
         anasem.visit(tree);
+
+        //Interprete
+        Interprete interprete = new Interprete();
+        interprete.visit(tree);
     }
 }

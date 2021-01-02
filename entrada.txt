@@ -5,16 +5,21 @@
 VARIABLES
     k: NUM;
     j: LOG;
+    v: SEQ(NUM);
 
 SUBPROGRAMAS
-    FUNCION mayor(SEQ(NUM) s) dev (NUM i,NUM max)
+
+    FUNCION mayor(SEQ(NUM) s, NUM q) dev (NUM i,NUM max)
         VARIABLES
-            j: NUM;
+            m: NUM;
         INSTRUCCIONES
             q = 10;
-            mientras(s[j]>max) hacer
-                i=j;
-            fmientras
+            m = 1;
+            MIENTRAS(m>0) HACER
+                k=q;
+                m = -1;
+            FMIENTRAS
+            DEV 0;
     FFUNCION
 
 INSTRUCCIONES
