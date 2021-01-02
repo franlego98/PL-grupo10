@@ -5,6 +5,7 @@ public class Interprete extends AnasintBaseVisitor<Integer>{
 
     List<List<Tupla>> vars_globales = new ArrayList<>();
 
+    //VisitPrograma
     public Integer visitPrograma(Anasint.ProgramaContext ctx){
         visit(ctx.variables());
         visit(ctx.subprogramas());
