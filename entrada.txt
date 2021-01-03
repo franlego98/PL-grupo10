@@ -15,12 +15,19 @@ SUBPROGRAMAS
         INSTRUCCIONES
             q = 10;
             m = 1;
-            MIENTRAS(m>0) HACER
+            s = [51,2];
+            q = s[0];
+            mostrar(3+4, q);
+            mientras(m>0) hacer
                 k=q;
                 m = -1;
-            FMIENTRAS
-            DEV 0;
+            fmientras
+            dev 0;
     FFUNCION
+
+    PROCESO a (SEQ(NUM) s, NUM q)
+        INSTRUCCIONES
+            a = mayor(s,q)
 
 INSTRUCCIONES
     k[1]=q;

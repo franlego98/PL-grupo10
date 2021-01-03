@@ -5,16 +5,17 @@ public class Interprete extends AnasintBaseVisitor<Integer>{
 
     List<List<Tupla>> vars_globales = new ArrayList<>();
 
+    //FUNCIONA
     //VisitPrograma
     public Integer visitPrograma(Anasint.ProgramaContext ctx){
         vars_globales.add(new ArrayList<Tupla>());
         visit(ctx.variables());
         visit(ctx.subprogramas());
         visit(ctx.instrucciones());
-        System.out.println(vars_globales);
         return 0;
     }
 
+    //FUNCIONA
     public Integer visitDecl_var(Anasint.Decl_varContext ctx){
         String ident;
         String tipo;
@@ -27,6 +28,7 @@ public class Interprete extends AnasintBaseVisitor<Integer>{
         return 0;
     }
 
+    //FUNCIONA
     public Integer visitFuncion(Anasint.FuncionContext ctx){
         //Decision 1.2
         vars_globales.add(new ArrayList<Tupla>());
@@ -35,7 +37,7 @@ public class Interprete extends AnasintBaseVisitor<Integer>{
         visit(ctx.instrucciones());
         return 0;
     }
-
+    //FUNCIONA
     public Integer visitIdentificador_funcion(Anasint.Identificador_funcionContext ctx){
         String ident;
         String tipo;
@@ -48,7 +50,7 @@ public class Interprete extends AnasintBaseVisitor<Integer>{
 
         return 0;
     }
-
+    //FUNCIONA
     public Integer visitProcedimiento(Anasint.ProcedimientoContext ctx){
         //Decision 1.2
         vars_globales.add(new ArrayList<Tupla>());
@@ -58,6 +60,7 @@ public class Interprete extends AnasintBaseVisitor<Integer>{
         return 0;
     }
 
+    //FUNCIONA
     public Integer visitIdentificador_procedimiento(Anasint.Identificador_procedimientoContext ctx){
         String ident;
         String tipo;
@@ -72,6 +75,7 @@ public class Interprete extends AnasintBaseVisitor<Integer>{
     }
     //INSTRUCCIONES
 
+    //FUNCIONA
     public Integer visitInstrucciones(Anasint.InstruccionesContext ctx){
 
         for (int i = 0; i < ctx.tipo_instruccion().size(); i++){
@@ -82,13 +86,12 @@ public class Interprete extends AnasintBaseVisitor<Integer>{
         return 0;
     }
 
+    //CASI FUNCIONA
     public Integer visitTipoInstruccion(Anasint.Tipo_instruccionContext ctx){
 
         String ti = ctx.getText();
-        System.out.println("HOLA");
         switch (ti){
             case "ins_asignacion":
-                System.out.println(ctx.ins_asignacion().getText());
                 visitIns_asignacion(ctx.ins_asignacion());
                 break;
             case "ins_condicion":
@@ -103,19 +106,18 @@ public class Interprete extends AnasintBaseVisitor<Integer>{
                 visitIns_dev(ctx.ins_devolucion());
                 break;
             case "ins_mostrar":
-                visitIns_most(ctx.ins_mostrar());
+                visitIns_mostrar(ctx.ins_mostrar());
                 break;
         }
         return 0;
     }
 
+    //FUNCIONA
     public Integer visitIns_asignacion(Anasint.Ins_asignacionContext ctx){
 
         List<Anasint.Identificador_variablesContext> idents = ctx.identificador_variables();
         List<Anasint.Expresion_asignacionContext> valores = ctx.expresion_asignacion();
-        for(int i = 0; i<valores.size(); i++) {
-            System.out.println(ctx.expresion_asignacion(i).getText());
-        }
+
         List<String> ids = new ArrayList<String>();
         List<String> vals = new ArrayList<String>();
 
@@ -124,43 +126,71 @@ public class Interprete extends AnasintBaseVisitor<Integer>{
             ids.add(i.getText());
         }
         for(Anasint.Expresion_asignacionContext e : valores){
-            System.out.println(e.getText());
             String esxp = visitExpr_asig(e);
             vals.add(esxp);
         }
-        //System.out.println(ids);
-        //System.out.println(vals);
 
         for(int i = 0; i < ids.size(); i++){
             actualizar_valor(ids.get(i), vals.get(i));
-            System.out.println(vars_globales);
         }
-
+        System.out.println(vars_globales);
 
 
         return 0;
     }
 
+    //FUNCIONA
     public String visitExpr_asig(Anasint.Expresion_asignacionContext ctx){
 
         String res = "";
-        Integer n = Integer.parseInt(ctx.expresion_asignacion1().getText());
-        System.out.println(ctx.expresion_asignacion1().getText());
         if(ctx.operadores_aritmeticos()!=null){
+            Integer n = Integer.parseInt(ctx.expresion_asignacion1().getText());
             switch (ctx.operadores_aritmeticos().getText()){
-                case "MAS":
-                    n += visit(ctx.expresion_asignacion());
+                case "+":
+                    n += Integer.parseInt(visitExpr_asig(ctx.expresion_asignacion()));
                     break;
-                case "MENOS":
-                    n -= visit(ctx.expresion_asignacion());
+                case "-":
+                    n -= Integer.parseInt(visitExpr_asig(ctx.expresion_asignacion()));
                     break;
-                case "POR":
-                    n *= visit(ctx.expresion_asignacion());
+                case "*":
+                    n *= Integer.parseInt(visitExpr_asig(ctx.expresion_asignacion()));
                 default:
                     break;
             }
+            res = n.toString();
+        }else{
+            res = visitExpresion_asignacion1(ctx.expresion_asignacion1());
         }
-        res = n.toString();
+
+        return res;
+    }
+
+    //CASI LISTA
+    public String visitExpresion_asignacion1(Anasint.Expresion_asignacion1Context ctx){
+        String exp = ctx.getText();
+        String res = "";
+        //Es un bool?
+        if(exp == "T" || exp == "F"){
+            res = exp;
+        }else if(exp.endsWith("]")){
+            if(exp.startsWith("[")){
+                res = exp;
+            }
+            else{
+                res = devolver_valor(exp);
+            }
+        }else if(exp.endsWith(")")){
+            if(exp.startsWith("(")){
+                //POR HACER
+                //POR HACER
+                //POR HACER
+            }else{
+
+            }
+        }else if(Character.isDigit(exp.charAt(0))){
+            res = exp;
+
+        }
 
         return res;
     }
@@ -255,28 +285,34 @@ public class Interprete extends AnasintBaseVisitor<Integer>{
         return 0;
     }
 
-    public Integer visitIns_most(Anasint.Ins_mostrarContext ctx){
+    //FUNCIONA
+    public Integer visitIns_mostrar(Anasint.Ins_mostrarContext ctx){
 
         List<Anasint.Expresion_asignacionContext> as = ctx.expresion_asignacion();
-
+        String res = "Mostrando: ";
         for(int i = 0; i<as.size(); i++){
-            visit(ctx.expresion_asignacion(i));
-            System.out.println(i);
+            if(existe(as.get(i).getText())) {
+                res += devolver_valor(as.get(i).getText())+ ", ";
+            }
+            else{
+                res += visitExpr_asig(as.get(i))+ ", ";
+            }
         }
-
+        res = res.substring(0,res.length()-2);
+        System.out.println(res);
         return 0;
     }
 
-
+    //FUNCIONAN TODAS!!
     //FUNCIONES UTILES
 
 
     //GUARDAR UNA VARIABLE AL DECLARARLA
     void declarar_variable(String ident, String tipo){
         String valor;
-        if(tipo.equals("NUM") || tipo.equals("LOG")) valor = "0";
+        if(tipo.equals("NUM")) valor = "0";
+        else if(tipo.equals("LOG")) valor = "T";
         else valor = "[]";
-        //System.out.println(valor);
         vars_globales.get(vars_globales.size()-1).add(new Tupla(ident,valor));
     }
 
@@ -289,13 +325,43 @@ public class Interprete extends AnasintBaseVisitor<Integer>{
         }
     }
 
-    //BUSCA Y DEVUELVE EL VALOR DE UNA VARIABLE
-    String devolver_valor(String ident) {
+    //EXISTE LA VARIABLE?
+    Boolean existe(String ident){
         for (List<Tupla> ls : vars_globales) {
             for (Tupla tpl : ls) {
-                if (ident == tpl.getV1()) return tpl.getV2();
+                if (ident.equals(tpl.getV1())) return true;
             }
         }
-        return null;
+        return false;
     }
+
+    //BUSCA Y DEVUELVE EL VALOR DE UNA VARIABLE
+    String devolver_valor(String ident) {
+        //ELEMENTO DE UNA LISTA?
+        if(ident.endsWith("]")){
+            String aux1 = ident.replace("]", "");
+            String aux2 = aux1.replace("[", ";");
+            String[] aux3 = aux2.split(";");
+            for (List<Tupla> ls : vars_globales) {
+                for (Tupla tpl : ls) {
+                    if (aux3[0].equals(tpl.getV1())){
+                        String valor = tpl.getV2();
+                        valor = valor.substring(1, valor.length()-1);
+                        String[] valores = valor.split(",");
+                        return valores[Integer.parseInt(aux3[1])];
+                    }
+                }
+            }
+
+        }
+        for (List<Tupla> ls : vars_globales) {
+            for (Tupla tpl : ls) {
+                if (ident.equals(tpl.getV1())) return tpl.getV2();
+            }
+        }
+        return "";
+    }
+
+
+
 }
