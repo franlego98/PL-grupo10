@@ -13,21 +13,30 @@ SUBPROGRAMAS
         VARIABLES
             m: NUM;
         INSTRUCCIONES
-            q = 10;
-            m = 1;
+            q,m = 6,7;
             s = [51,2];
-            q = s[0];
+            //q = s[0];
             mostrar(3+4, q);
+            si (q < m) entonces
+                mostrar (q);
+            sino
+                mostrar (m);
+            fsi
             mientras(m>0) hacer
                 k=q;
                 m = -1;
             fmientras
-            dev 0;
+            dev k,3;
     FFUNCION
 
-    PROCESO a (SEQ(NUM) s, NUM q)
-        INSTRUCCIONES
-            a = mayor(s,q)
 
+    PROCESO a (SEQ(NUM) s, NUM q)
+        VARIABLES
+            a : SEQ(NUM);
+        INSTRUCCIONES
+            s = [45,26];
+            q = 12;
+            a = mayor(s,q);
+            mostrar (a);
 INSTRUCCIONES
     k[1]=q;

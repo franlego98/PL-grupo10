@@ -67,12 +67,12 @@ operadores_aritmeticos: MAS | MENOS | POR ;
 
 expresion_asignacion1: T #AsigTrue
     | F #AsigFalse
-    | IDENT #AsigSimple
     | VALOR #AsigExplicit
     | IDENT CA expresion_asignacion CC #AsigLista
     | IDENT PA (expresion_asignacion (COMA expresion_asignacion)*)? PC #AsignFunc
     | PA expresion_asignacion PC #AsigParentesis
     | CA (expresion_asignacion (COMA expresion_asignacion)*)? CC #AsigExplicitLista
+    | IDENT #AsigSimple
     ;
 
 //INS CONDICION

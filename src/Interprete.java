@@ -1,22 +1,22 @@
 import java.util.ArrayList;
 import java.util.List;
 
-public class Interprete extends AnasintBaseVisitor<Integer>{
+public class Interprete extends AnasintBaseVisitor<String>{
 
     List<List<Tupla>> vars_globales = new ArrayList<>();
 
     //FUNCIONA
     //VisitPrograma
-    public Integer visitPrograma(Anasint.ProgramaContext ctx){
+    public String visitPrograma(Anasint.ProgramaContext ctx){
         vars_globales.add(new ArrayList<Tupla>());
         visit(ctx.variables());
         visit(ctx.subprogramas());
         visit(ctx.instrucciones());
-        return 0;
+        return "";
     }
 
     //FUNCIONA
-    public Integer visitDecl_var(Anasint.Decl_varContext ctx){
+    public String visitDecl_var(Anasint.Decl_varContext ctx){
         String ident;
         String tipo;
         for(String i : ctx.identificador_declaracion().getText().split(",")) {
@@ -25,20 +25,20 @@ public class Interprete extends AnasintBaseVisitor<Integer>{
             declarar_variable(ident, tipo);
             System.out.println(vars_globales);
         }
-        return 0;
+        return "";
     }
 
     //FUNCIONA
-    public Integer visitFuncion(Anasint.FuncionContext ctx){
+    public String visitFuncion(Anasint.FuncionContext ctx){
         //Decision 1.2
         vars_globales.add(new ArrayList<Tupla>());
         visitIdentificador_funcion(ctx.identificador_funcion());
         visit(ctx.variables());
-        visit(ctx.instrucciones());
-        return 0;
+
+        return visitInstrucciones(ctx.instrucciones());
     }
     //FUNCIONA
-    public Integer visitIdentificador_funcion(Anasint.Identificador_funcionContext ctx){
+    public String visitIdentificador_funcion(Anasint.Identificador_funcionContext ctx){
         String ident;
         String tipo;
         for(Anasint.Argumento_subprogramaContext i : ctx.argumento_subprograma()) {
@@ -48,20 +48,20 @@ public class Interprete extends AnasintBaseVisitor<Integer>{
             System.out.println(vars_globales);
         }
 
-        return 0;
+        return "";
     }
     //FUNCIONA
-    public Integer visitProcedimiento(Anasint.ProcedimientoContext ctx){
+    public String visitProcedimiento(Anasint.ProcedimientoContext ctx){
         //Decision 1.2
         vars_globales.add(new ArrayList<Tupla>());
         visitIdentificador_procedimiento(ctx.identificador_procedimiento());
         visit(ctx.variables());
         visit(ctx.instrucciones());
-        return 0;
+        return "";
     }
 
     //FUNCIONA
-    public Integer visitIdentificador_procedimiento(Anasint.Identificador_procedimientoContext ctx){
+    public String visitIdentificador_procedimiento(Anasint.Identificador_procedimientoContext ctx){
         String ident;
         String tipo;
         for(Anasint.Argumento_subprogramaContext i : ctx.argumento_subprograma()) {
@@ -71,25 +71,28 @@ public class Interprete extends AnasintBaseVisitor<Integer>{
             System.out.println(vars_globales);
         }
 
-        return 0;
+        return "";
     }
     //INSTRUCCIONES
 
     //FUNCIONA
-    public Integer visitInstrucciones(Anasint.InstruccionesContext ctx){
+    public String visitInstrucciones(Anasint.InstruccionesContext ctx){
+
+        String res = "";
 
         for (int i = 0; i < ctx.tipo_instruccion().size(); i++){
             System.out.println(ctx.tipo_instruccion(i).getText());
-            visit(ctx.tipo_instruccion(i));
+            res = visitTipoInstruccion(ctx.tipo_instruccion(i));
 
         }
-        return 0;
+        return res;
     }
 
-    //CASI FUNCIONA
-    public Integer visitTipoInstruccion(Anasint.Tipo_instruccionContext ctx){
+    //COMPROBAR ÚLTIMA
+    public String visitTipoInstruccion(Anasint.Tipo_instruccionContext ctx){
 
         String ti = ctx.getText();
+        String res = "";
         switch (ti){
             case "ins_asignacion":
                 visitIns_asignacion(ctx.ins_asignacion());
@@ -103,17 +106,17 @@ public class Interprete extends AnasintBaseVisitor<Integer>{
             case "ins_ruptura":
                 break;
             case "ins_devolucion":
-                visitIns_dev(ctx.ins_devolucion());
+                res = visitIns_dev(ctx.ins_devolucion());
                 break;
             case "ins_mostrar":
                 visitIns_mostrar(ctx.ins_mostrar());
                 break;
         }
-        return 0;
+        return res;
     }
 
     //FUNCIONA
-    public Integer visitIns_asignacion(Anasint.Ins_asignacionContext ctx){
+    public String visitIns_asignacion(Anasint.Ins_asignacionContext ctx){
 
         List<Anasint.Identificador_variablesContext> idents = ctx.identificador_variables();
         List<Anasint.Expresion_asignacionContext> valores = ctx.expresion_asignacion();
@@ -131,12 +134,13 @@ public class Interprete extends AnasintBaseVisitor<Integer>{
         }
 
         for(int i = 0; i < ids.size(); i++){
+            System.out.println(vals+","+ids);
             actualizar_valor(ids.get(i), vals.get(i));
         }
         System.out.println(vars_globales);
 
 
-        return 0;
+        return "";
     }
 
     //FUNCIONA
@@ -169,8 +173,8 @@ public class Interprete extends AnasintBaseVisitor<Integer>{
     public String visitExpresion_asignacion1(Anasint.Expresion_asignacion1Context ctx){
         String exp = ctx.getText();
         String res = "";
-        //Es un bool?
-        if(exp == "T" || exp == "F"){
+
+        if(exp.equals("T") || exp.equals("F")){
             res = exp;
         }else if(exp.endsWith("]")){
             if(exp.startsWith("[")){
@@ -187,15 +191,17 @@ public class Interprete extends AnasintBaseVisitor<Integer>{
             }else{
 
             }
-        }else if(Character.isDigit(exp.charAt(0))){
+        }else if(Character.isDigit(exp.charAt(0)) || exp.startsWith("-")){
             res = exp;
-
+        }else{
+            res = devolver_valor(exp);
         }
 
         return res;
     }
 
-    public Integer visitIns_condicion(Anasint.Ins_condicionContext ctx){
+    //FUNCIONA
+    public String visitIns_condicion(Anasint.Ins_condicionContext ctx){
 
         Boolean condicion = visitExpr_cond(ctx.expresion_condicional());
         List<Anasint.Tipo_instruccionContext> ins = ctx.tipo_instruccion();
@@ -206,45 +212,54 @@ public class Interprete extends AnasintBaseVisitor<Integer>{
                 visitTipo_instruccion(ctx.tipo_instruccion(i));
             }
         }else{
-            for (int i = 0; i<ins.size();i++){
+            for (int i = 0; i<ins2.size();i++){
                 visitTipo_instruccion(ctx.tipo_instruccion2(i).tipo_instruccion());
             }
         }
 
-        return 0;
+        return "";
     }
 
+    //FUNCIONA
     public Boolean visitExpr_cond(Anasint.Expresion_condicionalContext ctx){
 
         Boolean condicion = false;
-        String s = visit(ctx.expresion_condicional1()).toString();
+        String s = visitExpr_cond1(ctx.expresion_condicional1());
+        if(es_un_ident(s)){
+            s = devolver_valor(s);
+        }
 
         if(ctx.operadores_binarios() != null){
             Boolean condicionD = visitExpr_cond(ctx.expresion_condicional());
-            String s2 = visit(ctx.expresion_condicional().expresion_condicional1()).toString();
+            String s2 = visitExpr_cond1(ctx.expresion_condicional().expresion_condicional1());
+
+            if(es_un_ident(s2)){
+                s2 = devolver_valor(s2);
+            }
+
             switch (ctx.operadores_binarios().getText()){
-                case "CONJUNCION":
+                case "&&":
                     condicion = (Boolean.parseBoolean(s)) && condicionD;
                     break;
-                case "DISYUNCION":
+                case "||":
                     condicion = (Boolean.parseBoolean(s)) || condicionD;
                     break;
-                case "IGUAL":
+                case "==":
                     condicion = (s == s2);
                     break;
-                case "DESIGUAL":
+                case "!=":
                     condicion = (s != s2);
                     break;
-                case "MAYOR":
+                case ">":
                     condicion = (Integer.parseInt(s) > Integer.parseInt(s2));
                     break;
-                case "MENOR":
+                case "<":
                     condicion = (Integer.parseInt(s) < Integer.parseInt(s2));
                     break;
-                case "MAYORIGUAL":
+                case ">=":
                     condicion = (Integer.parseInt(s) >= Integer.parseInt(s2));
                     break;
-                case "MENORIGUAL":
+                case "<=":
                     condicion = (Integer.parseInt(s) <= Integer.parseInt(s2));
                     break;
                 default:
@@ -257,6 +272,26 @@ public class Interprete extends AnasintBaseVisitor<Integer>{
         return condicion;
     }
 
+    //COMPLETAR
+    public String visitExpr_cond1(Anasint.Expresion_condicional1Context ctx){
+
+        String res = "";
+        String c = ctx.getText();
+
+        if(c.equals("cierto") || c.equals("falso")){
+            res = c;
+        }else if(c.startsWith("!")){
+
+        }else if(c.startsWith("(")){
+
+        }else{
+            res = c;
+        }
+
+        return res;
+    }
+
+    //FUNCIONA
     public Integer visitIns_itera(Anasint.Ins_iteracionContext ctx){
 
         Boolean condicion = visitExpr_cond(ctx.expresion_condicional());
@@ -274,19 +309,24 @@ public class Interprete extends AnasintBaseVisitor<Integer>{
         return 0;
     }
 
-    public Integer visitIns_dev(Anasint.Ins_devolucionContext ctx){
+    //COMPROBAR
+    public String visitIns_dev(Anasint.Ins_devolucionContext ctx){
 
         List<Anasint.Expresion_asignacionContext> as = ctx.expresion_asignacion();
+        String res = "";
+        System.out.println("Llega aqui");
 
         for(int i = 0; i<as.size(); i++){
-            visit(ctx.expresion_asignacion(i));
+            res += visitExpr_asig(ctx.expresion_asignacion(i)) + ",";
         }
+        res = res.substring(0,res.length()-1);
+        eliminaVarsLocales();
 
-        return 0;
+        return res;
     }
 
     //FUNCIONA
-    public Integer visitIns_mostrar(Anasint.Ins_mostrarContext ctx){
+    public String visitIns_mostrar(Anasint.Ins_mostrarContext ctx){
 
         List<Anasint.Expresion_asignacionContext> as = ctx.expresion_asignacion();
         String res = "Mostrando: ";
@@ -300,15 +340,13 @@ public class Interprete extends AnasintBaseVisitor<Integer>{
         }
         res = res.substring(0,res.length()-2);
         System.out.println(res);
-        return 0;
+        return "";
     }
 
-    //FUNCIONAN TODAS!!
     //FUNCIONES UTILES
 
-
     //GUARDAR UNA VARIABLE AL DECLARARLA
-    void declarar_variable(String ident, String tipo){
+    public void declarar_variable(String ident, String tipo){
         String valor;
         if(tipo.equals("NUM")) valor = "0";
         else if(tipo.equals("LOG")) valor = "T";
@@ -317,7 +355,7 @@ public class Interprete extends AnasintBaseVisitor<Integer>{
     }
 
     //ACTUALIZAR UNA VARIABLE CON UN NUEVO VALOR
-    void actualizar_valor(String ident, String valor){
+    public void actualizar_valor(String ident, String valor){
         for (List<Tupla> ls: vars_globales){
             for(Tupla tpl : ls) {
                 if (ident.equals(tpl.getV1())) tpl.putV2(valor);
@@ -326,7 +364,7 @@ public class Interprete extends AnasintBaseVisitor<Integer>{
     }
 
     //EXISTE LA VARIABLE?
-    Boolean existe(String ident){
+    public Boolean existe(String ident){
         for (List<Tupla> ls : vars_globales) {
             for (Tupla tpl : ls) {
                 if (ident.equals(tpl.getV1())) return true;
@@ -336,8 +374,7 @@ public class Interprete extends AnasintBaseVisitor<Integer>{
     }
 
     //BUSCA Y DEVUELVE EL VALOR DE UNA VARIABLE
-    String devolver_valor(String ident) {
-        //ELEMENTO DE UNA LISTA?
+    public String devolver_valor(String ident) {
         if(ident.endsWith("]")){
             String aux1 = ident.replace("]", "");
             String aux2 = aux1.replace("[", ";");
@@ -362,6 +399,19 @@ public class Interprete extends AnasintBaseVisitor<Integer>{
         return "";
     }
 
+    //ES UN IDENT
+    public Boolean es_un_ident(String ident){
+        Boolean b = false;
+        if(Character.isLetter(ident.charAt(0))){
+            b = existe(ident);
+        }
+        return b;
+    }
 
+    //LIMPIA LAS VARIABLES LOCALES
+    public void eliminaVarsLocales(){
+        vars_globales.remove(vars_globales.size()-1);
+        System.out.println(vars_globales);
+    }
 
 }
