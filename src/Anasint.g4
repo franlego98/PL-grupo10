@@ -63,8 +63,6 @@ identificador_variables: IDENT CA expresion_asignacion CC #identLista
 //Operando de la derecha
 expresion_asignacion: expresion_asignacion1 (operadores_aritmeticos (expresion_asignacion))? ;
 
-operadores_aritmeticos: MAS | MENOS | POR ;
-
 expresion_asignacion1: T #AsigTrue
     | F #AsigFalse
     | VALOR #AsigExplicit
@@ -74,6 +72,8 @@ expresion_asignacion1: T #AsigTrue
     | CA (expresion_asignacion (COMA expresion_asignacion)*)? CC #AsigExplicitLista
     | IDENT #AsigSimple
     ;
+
+operadores_aritmeticos: MAS | MENOS | POR ;
 
 //INS CONDICION
 ins_condicion: SI PA expresion_condicional PC ENTONCES tipo_instruccion+ (SINO tipo_instruccion2+)? FSI;

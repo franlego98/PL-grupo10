@@ -5,17 +5,18 @@
 VARIABLES
     k: NUM;
     j: LOG;
+    res: NUM;
     v: SEQ(NUM);
 
 SUBPROGRAMAS
 
-    FUNCION mayor(SEQ(NUM) s, NUM q) dev (NUM i,NUM max)
+    FUNCION mayor(SEQ(NUM) s, NUM q) dev (NUM i)
         VARIABLES
             m: NUM;
         INSTRUCCIONES
             q,m = 6,7;
             s = [51,2];
-            //q = s[0];
+            q = s[0];
             mostrar(3+4, q);
             si (q < m) entonces
                 mostrar (q);
@@ -26,11 +27,11 @@ SUBPROGRAMAS
                 k=q;
                 m = -1;
             fmientras
-            dev k,3;
+            dev m;
     FFUNCION
 
 
-    PROCESO a (SEQ(NUM) s, NUM q)
+    PROCEDIMIENTO a (SEQ(NUM) s, NUM q)
         VARIABLES
             a : SEQ(NUM);
         INSTRUCCIONES
@@ -38,5 +39,10 @@ SUBPROGRAMAS
             q = 12;
             a = mayor(s,q);
             mostrar (a);
+    FPROCEDIMIENTO
+
 INSTRUCCIONES
-    k[1]=q;
+    k = 3;
+    v = [31,43,12];
+    res = k;
+    res = mayor(v,k);
