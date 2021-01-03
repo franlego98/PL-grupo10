@@ -7,6 +7,7 @@ VARIABLES
     j: LOG;
     res: NUM;
     v: SEQ(NUM);
+    r : LOG;
 
 SUBPROGRAMAS
 
@@ -30,7 +31,6 @@ SUBPROGRAMAS
             dev m;
     FFUNCION
 
-
     PROCEDIMIENTO a (SEQ(NUM) s, NUM q)
         VARIABLES
             a : SEQ(NUM);
@@ -46,3 +46,8 @@ INSTRUCCIONES
     v = [31,43,12];
     res = k;
     res = mayor(v,k);
+    si (r && falso) entonces
+        mostrar (1);
+    sino
+        mostrar (0);
+    fsi

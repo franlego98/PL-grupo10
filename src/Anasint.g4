@@ -83,9 +83,9 @@ expresion_condicional: expresion_condicional1 (operadores_binarios (expresion_co
 
 expresion_condicional1: CIERTO #CondCierto
     | FALSO #CondFalse
-    | expresion_asignacion #CondVar
     | NEGACION expresion_condicional #CondNegacion
     | PA expresion_condicional PC #CondParentesis
+    | expresion_asignacion #CondVar
     ;
 
 operadores_binarios: CONJUNCION | DISYUNCION | IGUAL | DESIGUAL | MAYOR | MENOR | MAYORIGUAL | MENORIGUAL;

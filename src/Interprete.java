@@ -242,29 +242,54 @@ public class Interprete extends AnasintBaseVisitor<String>{
         return "";
     }
 
+    public String visitCondCierto(Anasint.CondCiertoContext ctx) {
+        return "T";
+    }
+
+    public String visitCondFalse(Anasint.CondFalseContext ctx) {
+        return "F";
+    }
+
+    public String visitCondVar(Anasint.CondVarContext ctx) {
+        return visit(ctx.expresion_asignacion());
+    }
+
+    public String visitCondNegacion(Anasint.CondNegacionContext ctx) {
+        String s = ctx.expresion_condicional().getText();
+        if (s.equals("cierto")) return "F";
+        return "T";
+    }
+
+    public String visitCondParentesis(Anasint.CondParentesisContext ctx) {
+        return visit(ctx.expresion_condicional());
+    }
+
     //FUNCIONA
     public Boolean visitExpr_cond(Anasint.Expresion_condicionalContext ctx){
 
-        Boolean condicion = false;
-        String s = visitExpr_cond1(ctx.expresion_condicional1());
-        if(es_un_ident(s)){
-            s = devolver_valor(s);
-        }
+        Boolean condicion = true;
+        String s = visit(ctx.expresion_condicional1());
+
+        if(es_un_ident(s)) s = devolver_valor(s);
 
         if(ctx.operadores_binarios() != null){
-            Boolean condicionD = visitExpr_cond(ctx.expresion_condicional());
-            String s2 = visitExpr_cond1(ctx.expresion_condicional().expresion_condicional1());
 
-            if(es_un_ident(s2)){
-                s2 = devolver_valor(s2);
-            }
+            Boolean condicionI = false;
+            if (s.equals("T")) condicionI = true;
+
+            String s2 = visit(ctx.expresion_condicional().expresion_condicional1());
+            if(es_un_ident(s2)) s2 = devolver_valor(s2);
+
+
+            Boolean condicionD = true;
+            if (s2.equals("F")) condicionD = false;
 
             switch (ctx.operadores_binarios().getText()){
                 case "&&":
-                    condicion = (Boolean.parseBoolean(s)) && condicionD;
+                    condicion = condicionI && condicionD;
                     break;
                 case "||":
-                    condicion = (Boolean.parseBoolean(s)) || condicionD;
+                    condicion = condicionI || condicionD;
                     break;
                 case "==":
                     condicion = (s == s2);
@@ -292,25 +317,6 @@ public class Interprete extends AnasintBaseVisitor<String>{
         }
 
         return condicion;
-    }
-
-    //COMPLETAR
-    public String visitExpr_cond1(Anasint.Expresion_condicional1Context ctx){
-
-        String res = "";
-        String c = ctx.getText();
-
-        if(c.equals("cierto") || c.equals("falso")){
-            res = c;
-        }else if(c.startsWith("!")){
-
-        }else if(c.startsWith("(")){
-
-        }else{
-            res = c;
-        }
-
-        return res;
     }
 
     //FUNCIONA
