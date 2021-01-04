@@ -47,6 +47,7 @@ tipo_instruccion: ins_asignacion
     | ins_ruptura
     | ins_devolucion
     | ins_mostrar
+    | ins_procedimiento
     ;
 
 tipo_instruccion2: tipo_instruccion;
@@ -101,3 +102,6 @@ ins_devolucion: DEV expresion_asignacion (COMA expresion_asignacion)* PyC;
 
 //INS MOSTRAR
 ins_mostrar: MOSTRAR PA expresion_asignacion (COMA expresion_asignacion)* PC PyC;
+
+//INS PROCEDIMIENTO
+ins_procedimiento: IDENT PA expresion_asignacion (COMA expresion_asignacion)* PC PyC;

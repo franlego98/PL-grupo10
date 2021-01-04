@@ -3,7 +3,7 @@
 
 //      se encuentra.
 VARIABLES
-    k: NUM;
+    k,f: NUM;
     j: LOG;
     res: NUM;
     v: SEQ(NUM);
@@ -11,7 +11,7 @@ VARIABLES
 
 SUBPROGRAMAS
 
-    FUNCION mayor(SEQ(NUM) s, NUM q) dev (NUM i)
+    FUNCION mayor(SEQ(NUM) s, NUM q) dev (NUM i, NUM t)
         VARIABLES
             m: NUM;
         INSTRUCCIONES
@@ -24,11 +24,12 @@ SUBPROGRAMAS
             sino
                 mostrar (m);
             fsi
-            mientras(m>0) hacer
+            mientras(m<10) hacer
                 k=q;
-                m = -1;
+                m = m+1;
+                mostrar (m);
             fmientras
-            dev m;
+            dev m,m;
     FFUNCION
 
     PROCEDIMIENTO a (SEQ(NUM) s, NUM q)
@@ -38,16 +39,17 @@ SUBPROGRAMAS
             s = [45,26];
             q = 12;
             a = mayor(s,q);
-            mostrar (a);
+            mostrar (s);
     FPROCEDIMIENTO
 
 INSTRUCCIONES
-    k = 3;
+    k,f = 3,9;
     v = [31,43,12];
     res = k;
-    res = mayor(v,k);
+    res,k = mayor(v,k);
     si (r && falso) entonces
         mostrar (1);
     sino
         mostrar (0);
     fsi
+    a(v,res);

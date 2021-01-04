@@ -7,11 +7,11 @@ public class Interprete extends AnasintBaseVisitor<String>{
     //ALMACEN DE VARIABLES
     List<List<Tupla>> vars_globales = new ArrayList<>();
 
-    //ALMACEN DE FUNCIONES
+    //ALMACEN DE FUNCIONES Y PROCEDIMIENTOS
     HashMap<String,Anasint.FuncionContext> funcion_globales = new HashMap<String, Anasint.FuncionContext>();
+    HashMap<String,Anasint.ProcedimientoContext> procedimiento_globales = new HashMap<String, Anasint.ProcedimientoContext>();
 
-    //FUNCIONA
-    //VisitPrograma
+
     public String visitPrograma(Anasint.ProgramaContext ctx){
         vars_globales.add(new ArrayList<Tupla>());
         visit(ctx.variables());
@@ -20,7 +20,6 @@ public class Interprete extends AnasintBaseVisitor<String>{
         return "";
     }
 
-    //FUNCIONA
     public String visitDecl_var(Anasint.Decl_varContext ctx){
         String ident;
         String tipo;
@@ -28,7 +27,6 @@ public class Interprete extends AnasintBaseVisitor<String>{
             ident = i;
             tipo = ctx.tipo_de_dato().getText();
             declarar_variable(ident, tipo);
-            System.out.println(vars_globales);
         }
         return "";
     }
@@ -37,37 +35,14 @@ public class Interprete extends AnasintBaseVisitor<String>{
         for(Anasint.FuncionContext sp : ctx.funcion()){
             funcion_globales.put(sp.identificador_funcion().IDENT().getText(), sp);
         }
-
-        return "";
-    }
-
-    /*FUNCIONES CUANDO SON DECLARADAS
-    //FUNCIONA
-    public String visitFuncion(Anasint.FuncionContext ctx){
-        //Decision 1.2
-        vars_globales.add(new ArrayList<Tupla>());
-        visitIdentificador_funcion(ctx.identificador_funcion());
-        visit(ctx.variables());
-
-        return visitInstrucciones(ctx.instrucciones());
-    }
-
-    //FUNCIONA
-    public String visitIdentificador_funcion(Anasint.Identificador_funcionContext ctx){
-        String ident;
-        String tipo;
-        for(Anasint.Argumento_subprogramaContext i : ctx.argumento_subprograma()) {
-            ident = i.IDENT().getText();
-            tipo = i.tipo_de_dato().getText();
-            declarar_variable(ident, tipo);
-            System.out.println(vars_globales);
+        for(Anasint.ProcedimientoContext sp : ctx.procedimiento()){
+            procedimiento_globales.put(sp.identificador_procedimiento().IDENT().getText(),sp);
         }
 
         return "";
-    }*/
-    //FUNCIONES CUANDO SON LLAMADAS
+    }
+
     public String visitFuncion(Anasint.FuncionContext ctx, List<String> valores){
-        //Decision 1.2
         vars_globales.add(new ArrayList<Tupla>());
         visitIdentificador_funcion(ctx.identificador_funcion(),valores);
         visit(ctx.variables());
@@ -85,22 +60,32 @@ public class Interprete extends AnasintBaseVisitor<String>{
         for(int i = 0; i < ctx.argumento_subprograma().size(); i++) {
             ident = ctx.argumento_subprograma().get(i).IDENT().getText();
             actualizar_valor(ident, valores.get(i));
-            System.out.println(vars_globales);
         }
         return "";
     }
 
-    //FUNCIONA
-    public String visitProcedimiento(Anasint.ProcedimientoContext ctx){
-        //Decision 1.2
+    public String visitProcedimiento(Anasint.ProcedimientoContext ctx, List<String> valores){
         vars_globales.add(new ArrayList<Tupla>());
-        visitIdentificador_procedimiento(ctx.identificador_procedimiento());
+        visitIdentificador_procedimiento(ctx.identificador_procedimiento(),valores);
         visit(ctx.variables());
         visit(ctx.instrucciones());
         return "";
     }
+    public String visitIdentificador_procedimiento(Anasint.Identificador_procedimientoContext ctx, List<String> valores){
+        String ident;
+        String tipo;
+        for(Anasint.Argumento_subprogramaContext i : ctx.argumento_subprograma()) {
+            ident = i.IDENT().getText();
+            tipo = i.tipo_de_dato().getText();
+            declarar_variable(ident, tipo);
+        }
+        for(int i = 0; i < ctx.argumento_subprograma().size(); i++) {
+            ident = ctx.argumento_subprograma().get(i).IDENT().getText();
+            actualizar_valor(ident, valores.get(i));
+        }
+        return "";
+    }
 
-    //FUNCIONA
     public String visitIdentificador_procedimiento(Anasint.Identificador_procedimientoContext ctx){
         String ident;
         String tipo;
@@ -108,27 +93,27 @@ public class Interprete extends AnasintBaseVisitor<String>{
             ident = i.IDENT().getText();
             tipo = i.tipo_de_dato().getText();
             declarar_variable(ident, tipo);
-            System.out.println(vars_globales);
         }
 
         return "";
     }
+
     //INSTRUCCIONES
 
-    //FUNCIONA
     public String visitInstrucciones(Anasint.InstruccionesContext ctx){
 
         String res = "";
 
         for (int i = 0; i < ctx.tipo_instruccion().size(); i++){
-            System.out.println(ctx.tipo_instruccion(i).getText());
-            res = visit(ctx.tipo_instruccion(i));
-
+            if(ctx.tipo_instruccion(i).equals(Anasint.RUPTURA)){
+                return "";
+            }else {
+                res = visit(ctx.tipo_instruccion(i));
+            }
         }
         return res;
     }
 
-    //FUNCIONA
     public String visitIns_asignacion(Anasint.Ins_asignacionContext ctx){
 
         List<Anasint.Identificador_variablesContext> idents = ctx.identificador_variables();
@@ -143,23 +128,36 @@ public class Interprete extends AnasintBaseVisitor<String>{
         }
         for(Anasint.Expresion_asignacionContext e : valores){
             String esxp = visitExpr_asig(e);
-            vals.add(esxp);
+            String[] sp = esxp.split(",");
+            if(esxp.startsWith("[")){
+                vals.add(esxp);
+            }else if(sp.length>1){
+                for(int i = 0; i < sp.length; i++){
+                    vals.add(sp[i]);
+                }
+            }else{
+                vals.add(esxp);
+            }
         }
 
         for(int i = 0; i < ids.size(); i++){
             actualizar_valor(ids.get(i), vals.get(i));
         }
 
-        System.out.println(vars_globales);
         return "";
     }
 
-    //FUNCIONA
     public String visitExpr_asig(Anasint.Expresion_asignacionContext ctx){
 
         String res = "";
+        Integer n = 0;
         if(ctx.operadores_aritmeticos()!=null){
-            Integer n = Integer.parseInt(ctx.expresion_asignacion1().getText());
+            String exp1 = ctx.expresion_asignacion1().getText();
+            if(es_un_ident(exp1)){
+                n = Integer.parseInt(devolver_valor(exp1));
+            }else {
+                n = Integer.parseInt(exp1);
+            }
             switch (ctx.operadores_aritmeticos().getText()){
                 case "+":
                     n += Integer.parseInt(visitExpr_asig(ctx.expresion_asignacion()));
@@ -179,23 +177,18 @@ public class Interprete extends AnasintBaseVisitor<String>{
 
         return res;
     }
-    //TERMINADO
     public String visitAsigTrue(Anasint.AsigTrueContext ctx) {
         return "T";
     }
-    //TERMINADO
     public String visitAsigFalse(Anasint.AsigFalseContext ctx) {
         return "F";
     }
-    //TERMINADO
     public String visitAsigExplicit(Anasint.AsigExplicitContext ctx) {
         return ctx.getText();
     }
-    //TERMINADO
     public String visitAsigLista(Anasint.AsigListaContext ctx) {
         return devolver_valor(ctx.getText());
     }
-    //TERMINADO
     public String visitAsignFunc(Anasint.AsignFuncContext ctx) {
         Anasint.FuncionContext funcion = funcion_globales.get(ctx.IDENT().getText());
         List<String> valores = new ArrayList<>();
@@ -204,11 +197,9 @@ public class Interprete extends AnasintBaseVisitor<String>{
         }
         return visitFuncion(funcion,valores);
     }
-    //TERMINADO
     public String visitAsigParentesis(Anasint.AsigParentesisContext ctx) {
         return visit(ctx.expresion_asignacion());
     }
-    //TERMINADO
     public String visitAsigExplicitLista(Anasint.AsigExplicitListaContext ctx) {
         String res = "[";
         for(Anasint.Expresion_asignacionContext exp : ctx.expresion_asignacion()){
@@ -217,12 +208,10 @@ public class Interprete extends AnasintBaseVisitor<String>{
         res = res.substring(0,res.length()-1)+"]";
         return res;
     }
-    //TERMINADO
     public String visitAsigSimple(Anasint.AsigSimpleContext ctx) {
         return devolver_valor(ctx.getText());
     }
 
-    //FUNCIONA
     public String visitIns_condicion(Anasint.Ins_condicionContext ctx){
 
         Boolean condicion = visitExpr_cond(ctx.expresion_condicional());
@@ -231,40 +220,42 @@ public class Interprete extends AnasintBaseVisitor<String>{
 
         if(condicion){
             for (int i = 0; i<ins.size();i++){
-                visitTipo_instruccion(ctx.tipo_instruccion(i));
+                if(ctx.tipo_instruccion(i).equals(Anasint.RUPTURA)){
+                    return "";
+                }else{
+                    visitTipo_instruccion(ctx.tipo_instruccion(i));
+                }
             }
         }else{
             for (int i = 0; i<ins2.size();i++){
-                visitTipo_instruccion(ctx.tipo_instruccion2(i).tipo_instruccion());
+                if(ctx.tipo_instruccion(i).equals(Anasint.RUPTURA)){
+                    return "";
+                }else{
+                    visitTipo_instruccion(ctx.tipo_instruccion2(i).tipo_instruccion());
+                }
             }
         }
 
         return "";
     }
-
     public String visitCondCierto(Anasint.CondCiertoContext ctx) {
         return "T";
     }
-
     public String visitCondFalse(Anasint.CondFalseContext ctx) {
         return "F";
     }
-
     public String visitCondVar(Anasint.CondVarContext ctx) {
         return visit(ctx.expresion_asignacion());
     }
-
     public String visitCondNegacion(Anasint.CondNegacionContext ctx) {
         String s = ctx.expresion_condicional().getText();
         if (s.equals("cierto")) return "F";
         return "T";
     }
-
     public String visitCondParentesis(Anasint.CondParentesisContext ctx) {
         return visit(ctx.expresion_condicional());
     }
 
-    //FUNCIONA
     public Boolean visitExpr_cond(Anasint.Expresion_condicionalContext ctx){
 
         Boolean condicion = true;
@@ -319,8 +310,7 @@ public class Interprete extends AnasintBaseVisitor<String>{
         return condicion;
     }
 
-    //FUNCIONA
-    public Integer visitIns_itera(Anasint.Ins_iteracionContext ctx){
+    public String visitIns_iteracion(Anasint.Ins_iteracionContext ctx) {
 
         Boolean condicion = visitExpr_cond(ctx.expresion_condicional());
         List<Anasint.Tipo_instruccionContext> ins = ctx.tipo_instruccion();
@@ -328,16 +318,15 @@ public class Interprete extends AnasintBaseVisitor<String>{
         if(condicion){
             for(int i = 0; i<ins.size(); i++) {
                 if(ctx.tipo_instruccion(i).equals(Anasint.RUPTURA)){
-                    return 0;
+                    return "";
                 }
                 visit(ctx.tipo_instruccion(i));
             }
+            visitIns_iteracion(ctx);
         }
-
-        return 0;
+        return "";
     }
 
-    //COMPROBAR
     public String visitIns_devolucion(Anasint.Ins_devolucionContext ctx){
 
         List<Anasint.Expresion_asignacionContext> as = ctx.expresion_asignacion();
@@ -351,21 +340,34 @@ public class Interprete extends AnasintBaseVisitor<String>{
         return res;
     }
 
-    //FUNCIONA
     public String visitIns_mostrar(Anasint.Ins_mostrarContext ctx){
 
         List<Anasint.Expresion_asignacionContext> as = ctx.expresion_asignacion();
-        String res = "Mostrando: ";
+        String res = "";
         for(int i = 0; i<as.size(); i++){
             if(existe(as.get(i).getText())) {
-                res += devolver_valor(as.get(i).getText())+ ", ";
+                res += as.get(i).getText() + " = " + devolver_valor(as.get(i).getText())+ ", ";
             }
             else{
-                res += visitExpr_asig(as.get(i))+ ", ";
+                res += as.get(i).getText() + " = " + visitExpr_asig(as.get(i))+ ", ";
             }
         }
         res = res.substring(0,res.length()-2);
         System.out.println(res);
+        return "";
+    }
+
+    public String visitIns_ruptura(Anasint.Ins_rupturaContext ctx) {
+        return "";
+    }
+
+    public String visitIns_procedimiento(Anasint.Ins_procedimientoContext ctx) {
+        Anasint.ProcedimientoContext proc = procedimiento_globales.get(ctx.IDENT().getText());
+        List<String> valores = new ArrayList<>();
+        for(Anasint.Expresion_asignacionContext exp : ctx.expresion_asignacion()){
+            valores.add(visit(exp));
+        }
+        visitProcedimiento(proc,valores);
         return "";
     }
 
@@ -437,7 +439,6 @@ public class Interprete extends AnasintBaseVisitor<String>{
     //LIMPIA LAS VARIABLES LOCALES
     public void eliminaVarsLocales(){
         vars_globales.remove(vars_globales.size()-1);
-        System.out.println(vars_globales);
     }
 
 }
