@@ -105,12 +105,9 @@ public class Interprete extends AnasintBaseVisitor<String>{
         String res = "";
 
         for (int i = 0; i < ctx.tipo_instruccion().size(); i++){
-            if(ctx.tipo_instruccion(i).equals(Anasint.RUPTURA)){
-                return "";
-            }else {
-                res = visit(ctx.tipo_instruccion(i));
-            }
+            res = visit(ctx.tipo_instruccion(i));
         }
+        eliminaVarsLocales();
         return res;
     }
 
@@ -220,19 +217,11 @@ public class Interprete extends AnasintBaseVisitor<String>{
 
         if(condicion){
             for (int i = 0; i<ins.size();i++){
-                if(ctx.tipo_instruccion(i).equals(Anasint.RUPTURA)){
-                    return "";
-                }else{
-                    visitTipo_instruccion(ctx.tipo_instruccion(i));
-                }
+                visitTipo_instruccion(ctx.tipo_instruccion(i));
             }
         }else{
             for (int i = 0; i<ins2.size();i++){
-                if(ctx.tipo_instruccion(i).equals(Anasint.RUPTURA)){
-                    return "";
-                }else{
-                    visitTipo_instruccion(ctx.tipo_instruccion2(i).tipo_instruccion());
-                }
+                visitTipo_instruccion(ctx.tipo_instruccion2(i).tipo_instruccion());
             }
         }
 
@@ -335,7 +324,6 @@ public class Interprete extends AnasintBaseVisitor<String>{
             res += visitExpr_asig(ctx.expresion_asignacion(i)) + ",";
         }
         res = res.substring(0,res.length()-1);
-        eliminaVarsLocales();
 
         return res;
     }

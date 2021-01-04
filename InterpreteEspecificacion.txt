@@ -1,0 +1,130 @@
+    ++Decisiones de diseño:
+
+1.Almacenar las variables con su valor en un array de listas de tuplas.
+
+1.1.Cuando creamos una variable, se llama a la función declarar_variable(). Esta función creará la variable con su
+identificador con su valor por defecto (0 para NUM y T para LOG, y si es SEQ, se creará vacía []). Por último se añadirá
+a la última lista del almacén de variables globales porque esto puede hacerse tanto en el programa principal como en
+cualquier subprograma.
+
+1.2.Los argumentos de un subprograma se añadirán en una nueva lista de tuplas al almacén de variables, en caso de que no
+tenga argumentos, se creará una lista vacía.
+
+1.3.En la última lista del almacén de variables se irán añadiendo las variables locales que se declaren secuencialmente
+hacia abajo en el programa.
+
+1.4.Al terminar de ejecutar un subprograma (Llegar a una instrucción FPROCEDIMIENTO o FFUNCION) se eliminará la última
+lista de tuplas del almacén de variables.
+
+
+2.Ejecutar secuencialmente el lenguaje (definiciones y evaluaciones).
+
+
+3.Se crean dos almacenes, que son mapas, uno para almacenar los contextos de las funciones y otro para almacenar los
+contextos de los procedimientos, donde las claves son el identificador correspondiente. Con esto se puede llamar a un
+subprograma ya declarado dentro de otro.
+
+
+4.En cada instrucción se llama a un visitIns_tipoInstruccion en la que se irán realizando unas acciones u otras en
+función de la necesidad del programa.
+
+
+5.Interpretar si es una variable o una expresión en las ins_asignación.
+
+5.1.Al identificar una variable habrá que interpretar si es una lista o un IDENT directamente.
+
+5.2.En las expresiones de las instrucciones de asignación habrá de interpretarse el valor de estas expresiones y
+sucedáneas a esta. También habrá que tener en cuenta la interpretación de los casos recursivos.
+
+
+6.Si se cumple la condición de un expresión condicional se seguirá la ejecución del programa con la siguiente línea,
+si no se cumple saltaremos al siguiente SINO o FSI.
+
+
+7.Después de una instrucción RUPTURA seguirá la ejecución del código en la siguiente línea válida.
+
+
+8.La instrucción MOSTRAR mostrará en pantalla el valor de las expresiones asignaciones.
+
+
+
+Gramática atribuida:
+
+//Almacén de variables
+
+
+    DECISIÓN 1.1 y 1.3:
+
+vars_globales: lista de tuplas
+
+variables: VARIABLES (decl_var PyC)
+
+decl_var: ident_declaracion DP tipo_de_dato
+{añadir en la última lista de vars_globales la tupla (ident_declaracion, valor_def)
+valor_def = {Si tipo_de_dato == seq entonces valor_def = [ ], Sino valor_def = 0)
+
+subprogramas: SUBPROGRAMAS (funcion | procedimiento)
+{Generamos una nueva lista en vars_globales}
+
+
+    DECISIÓN 1.2:
+
+funcion: FUNCION identificador_funcion variables instrucciones FFUNCION;
+{Los identificadores de la función los añadimos en vars_globales en su última lista como una tupla, donde el primer
+valor es el identificador y el segundo el valor}
+
+
+procedimiento: PROCEDIMIENTO identificador procedimiento variables instrucciones FPROCEDIMIENTO
+{Los identificadores del procedimiento los añadimos en vars_globales en su última lista como una tupla, donde el primer
+valor es el identificador y el segundo el valor}
+
+
+    DECISIÓN 1.4:
+
+funcion: FUNCION identificador_funcion variables instrucciones FFUNCION;
+{Cuando lleguemos a FFUNCION eliminamos la última lista de vars_globales}
+
+procedimiento: PROCEDIMIENTO identificador procedimiento variables instrucciones FPROCEDIMIENTO;
+{Cuando lleguemos a FPROCEDIMIENTO eliminamos la última lista de vars_globales}
+
+
+    DECISIÓN 2:
+programa: variables subprogramas instrucciones EOF;
+{visitamos las variables, seguidamente los subprogramas y por último las instrucciones}
+
+
+    DECISIÓN 3:
+Subprogramas: SUBPROGRAMAS(funcion | procedimiento)*{se recorren las funciones y procedimientos y se guardan
+sus contextos en su almacén correspondiente, con su identificador como clave}
+
+
+    DECISIÓN 4 y 5:
+
+ins_asignacion: identificador_variables (COMA identificador_variables)*ASIG expresion_asignacion (COMA expresion_asignacion)* PYC;
+{ con respecto del operando izquierdo(identificador_variables) simplemente necesitamos el texto de entrada; ahora bien,
+con el operando derecho(expresion_asignacion) tendremos que tratar cada tipo posible de asignación individualmente.
+Tras obtener la asignación completa y tratada, se procederá a actualizar el almacén global }
+
+
+    DECISIÓN 4 y 6:
+
+ins_condicion: SI PA expresion_condicional PC ENTONCES tipo_instruccion+ (SINO tipo_instruccion2+)? FSI;{ en este caso
+evaluamos primero la expresio_condicional para poder guiar al intérprete. Tras conocer el resultado de
+expresion_condicional, podemos evaluar a tipo_instruccion en caso de que la evaluación haya sido positiva o
+tipo_instruccion2 en otro caso }
+
+
+ins_iteracion: MIENTRAS PA expresion_condicional PC HACER tipo_instruccion FMIENTRAS;{ hacemos que mientras se cumpla
+la condición evaluada en expresion_condicional se ejecute el bucle. Esto lo conseguimos haciendo que se visite a se mismo }
+
+
+    DECISIÓN 7:
+
+ins_ruptura: RUPTURA PyC;{ proceder con ruptura }
+
+ins_devolucion: DEV expresion_asignacion (COMA expresion_asignacion)* PyC; { evalúa la/s expresion_asignacion que tenga,
+tras esto devolvemos los resultados al mismo tiempo que eliminamos las posibles variables locales de la función o procedimiento }
+
+    DECISIÓN 8:
+
+ins_mostrar: MOSTRAR PA expresion_asignacion (COMA expresion_asignacion)* PC PyC; { resolvemos expresion_asignacion y mostramos por pantalla el resultado }
